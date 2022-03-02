@@ -1,7 +1,6 @@
 package uj.jwzp.kpnk.GymApp.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uj.jwzp.kpnk.GymApp.controller.CoachController;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
@@ -11,7 +10,7 @@ import java.util.Set;
 @Service
 public class CoachService {
 
-    private final CoachRepository repository;
+    private CoachRepository repository;
 
     @Autowired
     public CoachService(CoachRepository repository) {

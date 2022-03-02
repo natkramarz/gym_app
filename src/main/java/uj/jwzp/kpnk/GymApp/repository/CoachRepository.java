@@ -1,5 +1,6 @@
 package uj.jwzp.kpnk.GymApp.repository;
 
+import org.springframework.stereotype.Repository;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Repository
 public class CoachRepository {
 
     private final Map<Integer, Coach> coaches = new HashMap<>();
