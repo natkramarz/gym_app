@@ -12,10 +12,10 @@ gradle-build:
   artifacts:
     paths:
       - build/libs/*.jar
-#  cache:
-#    key: gradle-cache
-#    paths:
-#      - .gradle/caches
+  cache:
+    key: gradle-cache
+    paths:
+      - .gradle/caches
 
 heroku-deploy:
   image: docker:stable
