@@ -29,7 +29,7 @@ public class EventController {
 
     @GetMapping("{id}")
     public ResponseEntity<?> getEvent(@PathVariable int id) {
-        return service.event(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.event(id));
     }
 
     @PostMapping
@@ -48,15 +48,17 @@ public class EventController {
 
     @PatchMapping(path = "{id}")
     public ResponseEntity<?> modifyEvent(@PathVariable int id, @RequestBody EventCreateRequest request) {
-        return service.modifyEvent(
-                id,
-                request.title(),
-                request.day(),
-                request.time(),
-                request.duration(),
-                request.clubId(),
-                request.coachId()
-        ).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(
+                service.modifyEvent(
+                        id,
+                        request.title(),
+                        request.day(),
+                        request.time(),
+                        request.duration(),
+                        request.clubId(),
+                        request.coachId()
+                )
+        );
     }
 
     @DeleteMapping(path = "{id}")

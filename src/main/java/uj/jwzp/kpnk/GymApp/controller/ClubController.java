@@ -28,7 +28,7 @@ public class ClubController {
 
     @GetMapping(path = "{id}")
     public ResponseEntity<?> getClub(@PathVariable int id) {
-        return service.club(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.club(id));
     }
 
     @PostMapping
@@ -39,8 +39,7 @@ public class ClubController {
 
     @PatchMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
-        return service.modifyClub(id, request.name(), request.address(), request.whenOpen())
-                .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.modifyClub(id, request.name(), request.address(), request.whenOpen()));
     }
 
     @DeleteMapping(path = "{id}")
