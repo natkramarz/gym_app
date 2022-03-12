@@ -44,6 +44,8 @@ public class ClubService {
     }
 
     public void removeClub(int id) {
+        if (repository.club(id).isEmpty()) throw new ClubNotFoundException(id);
+
         repository.removeClub(id);
     }
 }

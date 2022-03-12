@@ -38,6 +38,8 @@ public class CoachService {
     }
 
     public void removeCoach(int id) {
+        if (repository.coach(id).isEmpty()) throw new CoachNotFoundException(id);
+
         repository.removeCoach(id);
     }
 }
