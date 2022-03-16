@@ -28,7 +28,7 @@ public class CoachController {
 
     @GetMapping(path = "{id}")
     public ResponseEntity<?> getCoach(@PathVariable int id) {
-        return service.coach(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.coach(id));
     }
 
     @PostMapping
@@ -39,7 +39,7 @@ public class CoachController {
 
     @PatchMapping(path = "{id}")
     public ResponseEntity<?> modifyCoach(@PathVariable int id, @RequestBody CoachCreateRequest request) {
-        return service.modifyCoach(id, request.firstName(), request.lastName(), request.yearOfBirth()).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.modifyCoach(id, request.firstName(), request.lastName(), request.yearOfBirth()));
     }
 
     @DeleteMapping(path = "{id}")
