@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.event.EventDurationException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
@@ -34,6 +35,7 @@ public class EventService {
     public Event addEvent(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
         if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
         if (coachRepository.coach(coachId).isEmpty()) throw new CoachNotFoundException(coachId);
+        if (duration.compareTo(Duration.ofHours(24)) < 0) throw new EventDurationException(duration.toHours());
 
         return repository.addEvent(title, day, time, duration, clubId, coachId);
     }
@@ -68,6 +70,7 @@ public class EventService {
         if (repository.event(id).isEmpty()) throw new EventNotFoundException(id);
         if (coachRepository.coach(coachId).isEmpty()) throw new CoachNotFoundException(id);
         if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
+        if (duration.compareTo(Duration.ofHours(24)) < 0) throw new EventDurationException(duration.toHours());
 
         Event modified = new Event(id, title, day, time, duration, clubId, coachId);
         return repository.modifyEvent(id, modified);
