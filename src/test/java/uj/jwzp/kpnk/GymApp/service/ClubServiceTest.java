@@ -7,12 +7,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Club;
+import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -26,6 +29,8 @@ public class ClubServiceTest {
     private static Club club;
     @Mock
     private ClubRepository clubRepository;
+    @Mock
+    private EventService eventService;
     @InjectMocks
     private ClubService clubService;
 
@@ -88,5 +93,24 @@ public class ClubServiceTest {
         assertThatThrownBy(() -> clubService.removeClub(1))
                 .isInstanceOf(ClubNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown club id: 1");
+    }
+
+    @Test
+    public void removeClubWithEvents() {
+        given(clubRepository.club(1)).willReturn(Optional.of(club));
+        given(eventService.eventsByClub(1)).willReturn(Set.of(
+                new Event(
+                        1,
+                        "test",
+                        DayOfWeek.MONDAY,
+                        LocalTime.NOON,
+                        Duration.ofMinutes(5),
+                        1,
+                        1
+                )));
+
+        assertThatThrownBy(() -> clubService.removeClub(1))
+                .isInstanceOf(ClubHasEventException.class)
+                .hasFieldOrPropertyWithValue("message", "There are events in club: 1");
     }
 }
