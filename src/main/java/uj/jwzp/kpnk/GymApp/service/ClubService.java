@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Club;
+import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
@@ -18,10 +20,12 @@ import java.util.Set;
 public class ClubService {
 
     private final ClubRepository repository;
+    private final EventService eventService;
 
     @Autowired
-    public ClubService(ClubRepository repository) {
+    public ClubService(ClubRepository repository, EventService eventService) {
         this.repository = repository;
+        this.eventService = eventService;
     }
 
     public Set<Club> allClubs() {
@@ -45,6 +49,7 @@ public class ClubService {
 
     public void removeClub(int id) {
         if (repository.club(id).isEmpty()) throw new ClubNotFoundException(id);
+        if (!eventService.eventsByClub(id).isEmpty()) throw new ClubHasEventException(id);
 
         repository.removeClub(id);
     }
