@@ -18,6 +18,7 @@ import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,8 +40,9 @@ public class EventService {
         LocalTime clubFrom = openingHoursMap.get(day).from();
         LocalTime clubTo = openingHoursMap.get(day).to();
         if (time.compareTo(clubFrom) >= 0) {
-            if (time.plus(duration).compareTo(clubTo) <= 0) return true;
-            return isEventTimeBetweenClubOpeningHours(openingHoursMap, day.plus(1), LocalTime.MIDNIGHT, duration.minus(Duration.between(time, LocalTime.MIDNIGHT)));
+            if (Duration.between(time, clubTo).compareTo(duration) >= 0) return true;
+            if (clubTo.compareTo(LocalTime.MAX) != 0) return false;
+            return isEventTimeBetweenClubOpeningHours(openingHoursMap, day.plus(1), LocalTime.MIDNIGHT, duration.minus(Duration.between(time, LocalTime.MAX)));
         }
         return false;
     }

@@ -28,6 +28,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
@@ -35,7 +36,7 @@ public class EventServiceTest {
     private static Event event;
     private static Club club;
     private static Coach coach;
-    private static Coach coach2;
+    private static Event event1;
     @Mock
     private EventRepository eventRepository;
     @Mock
@@ -50,13 +51,13 @@ public class EventServiceTest {
         Map<DayOfWeek, OpeningHours> whenOpen = new HashMap<>();
         whenOpen.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
         whenOpen.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
-        whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(0, 0)));
-        whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.of(0, 0)));
+        whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.MAX));
+        whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.MAX));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
         club = new Club(1, "testClub1", "testAddress1", whenOpen);
         coach = new Coach(1, "testCoach1", "testCoach1", 2000);
-        coach2 = new Coach(2, "testCoach2", "testCoach2", 2001);
         event = new Event(1, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1);
+        event1 = new Event(2, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), event.clubId(), event.coachId());
     }
 
     @Test
@@ -240,13 +241,12 @@ public class EventServiceTest {
 
     @Test
     public void addEventInClub24per7() {
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
         given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
-        given(eventService.addEvent(event.title(), DayOfWeek.WEDNESDAY, LocalTime.of(23,0), Duration.ofHours(4), event.clubId(), event.coachId()))
-                .willReturn(event);
+        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
+        given(eventRepository.addEvent(event1.title(), event1.day(), event1.time(), event1.duration(), event1.clubId(), event1.coachId())).willReturn(event1);
 
-        var serviceEvent = eventService.addEvent(event.title(), DayOfWeek.WEDNESDAY, LocalTime.of(23,0), Duration.ofHours(4), event.clubId(), event.coachId());
-        Assertions.assertEquals(serviceEvent, event);
+        var serviceEvent = eventService.addEvent(event1.title(), event1.day(), event1.time(), event1.duration(), event1.clubId(), event1.coachId());
+        Assertions.assertEquals(serviceEvent, event1);
     }
 
     @Test
@@ -254,7 +254,7 @@ public class EventServiceTest {
         given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
         given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), DayOfWeek.THURSDAY, LocalTime.of(23,0), Duration.ofHours(4), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.addEvent(event.title(), DayOfWeek.MONDAY, LocalTime.of(20,0), Duration.ofHours(5), event.clubId(), event.coachId()))
                 .isInstanceOf(EventTimeException.class)
                 .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.title());
     }
