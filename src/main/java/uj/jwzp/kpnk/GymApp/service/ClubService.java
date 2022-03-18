@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
@@ -42,7 +43,11 @@ public class ClubService {
 
     public Club modifyClub(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
         if (repository.club(id).isEmpty()) throw new ClubNotFoundException(id);
-
+        Set<Event> events = eventService.eventsByClub(id);
+        for (Event event: events) {
+            if (!eventService.isEventTimeBetweenClubOpeningHours(whenOpen, event.day(), event.time(), event.duration()))
+                throw new ClubOpeningHoursException(id);
+        }
         Club modified = new Club(id, name, address, whenOpen);
         return repository.modifyClub(id, modified);
     }

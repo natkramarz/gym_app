@@ -9,10 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
+import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -31,6 +33,8 @@ public class ClubServiceTest {
     private ClubRepository clubRepository;
     @Mock
     private EventService eventService;
+    @Mock
+    private CoachRepository coachRepository;
     @InjectMocks
     private ClubService clubService;
 
@@ -38,7 +42,10 @@ public class ClubServiceTest {
     static void setUp() {
         Map<DayOfWeek, OpeningHours> whenOpen = new HashMap<>();
         whenOpen.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
-
+        whenOpen.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
+        whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(0, 0)));
+        whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.of(0, 0)));
+        whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
         club = new Club(1, "testClub1", "testAddress1", whenOpen);
     }
 
@@ -112,5 +119,36 @@ public class ClubServiceTest {
         assertThatThrownBy(() -> clubService.removeClub(1))
                 .isInstanceOf(ClubHasEventException.class)
                 .hasFieldOrPropertyWithValue("message", "There are events in club: 1");
+    }
+
+    @Test
+    public void modifyClubWithEventsStandingOut() {
+        given(clubRepository.club(1)).willReturn(Optional.of(club));
+        given(eventService.eventsByClub(1)).willReturn(Set.of(
+                new Event(
+                        1,
+                        "testEvent1",
+                        DayOfWeek.MONDAY,
+                        LocalTime.of(8,0),
+                        Duration.ofHours(2),
+                        1,
+                        1
+                ),
+                new Event(
+                        1,
+                        "testEvent2",
+                        DayOfWeek.TUESDAY,
+                        LocalTime.of(12,0),
+                        Duration.ofHours(4),
+                        1,
+                        1
+                )));
+
+        Map<DayOfWeek, OpeningHours> newOpeningHours = new HashMap<>();
+        newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));
+        newOpeningHours.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(13, 0), LocalTime.of(22, 0)));
+        assertThatThrownBy(() -> clubService.modifyClub(club.id(), club.name(), club.address(), newOpeningHours))
+                .isInstanceOf(ClubOpeningHoursException.class)
+                .hasFieldOrPropertyWithValue("message", "There are standing out events in club: " + club.id());
     }
 }
