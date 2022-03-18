@@ -85,4 +85,9 @@ public class CoachServiceTest {
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown coach id: 1");
     }
+
+    @Test
+    public void removeCoachWithAssignedEvents() {
+
+    }
 }
