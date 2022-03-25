@@ -43,7 +43,7 @@ public class EventController {
                 request.coachId()
         );
 
-        return ResponseEntity.created(URI.create("/api/events/" + createdEvent.id())).body(createdEvent);
+        return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
 
     @PatchMapping(path = "{id}")

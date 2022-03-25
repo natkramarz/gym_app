@@ -6,7 +6,8 @@ import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
-import java.util.Set;
+import javax.persistence.EntityNotFoundException;
+import java.util.*;
 
 @Service
 public class CoachService {
@@ -21,11 +22,11 @@ public class CoachService {
     }
 
     public Set<Coach> allCoaches() {
-        return repository.allCoaches();
+        return new HashSet<>(repository.findAll());
     }
 
     public Coach coach(int id) {
-        return repository.coach(id).orElseThrow(() -> new CoachNotFoundException(id));
+        return Optional.of(repository.getById(id)).orElseThrow(() -> new CoachNotFoundException(id));
     }
 
     public Coach addCoach(String firstName, String lastName, int yearOfBirth) {
@@ -33,15 +34,22 @@ public class CoachService {
     }
 
     public Coach modifyCoach(int id, String firstName, String lastName, int yearOfBirth) {
-        if (repository.coach(id).isEmpty()) throw new CoachNotFoundException(id);
-
+        try {
+            Coach old = repository.getById(id);
+        } catch (EntityNotFoundException e){
+            throw new CoachNotFoundException(id);
+        }
         Coach modified = new Coach(id, firstName, lastName, yearOfBirth);
-        return repository.modifyCoach(id, modified);
+        return repository.save(modified);
     }
 
     public void removeCoach(int id) {
-        if (repository.coach(id).isEmpty()) throw new CoachNotFoundException(id);
+        try {
+            repository.getById(id);
+        } catch (EntityNotFoundException e){
+            throw new CoachNotFoundException(id);
+        }
         if (!eventService.eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
-        repository.removeCoach(id);
+        repository.deleteById(id);
     }
 }

@@ -35,7 +35,7 @@ public class CoachServiceTest {
 
     @Test
     public void getAllCoachesWithOneCoach() {
-        given(coachRepository.allCoaches()).willReturn(Set.of(coach));
+        given(coachRepository.findAll()).willReturn(Set.of(coach));
 
         var coaches = coachService.allCoaches();
         assertThat(coaches).containsExactly(coach);
@@ -43,16 +43,16 @@ public class CoachServiceTest {
 
     @Test
     public void getAllCoachesEmpty() {
-        given(coachRepository.allCoaches()).willReturn(Collections.emptySet());
+        given(coachRepository.findAll()).willReturn(Collections.emptySet());
 
         Assertions.assertTrue(coachService.allCoaches().isEmpty());
     }
 
     @Test
     public void addValidCoach() {
-        given(coachRepository.addCoach(coach.firstName(), coach.lastName(), coach.yearOfBirth())).willReturn(coach);
+        given(coachRepository.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth())).willReturn(coach);
 
-        var serviceCoach = coachService.addCoach(coach.firstName(), coach.lastName(), coach.yearOfBirth());
+        var serviceCoach = coachService.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth());
         Assertions.assertEquals(serviceCoach, coach);
     }
 

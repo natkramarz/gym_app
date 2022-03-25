@@ -34,7 +34,7 @@ public class ClubController {
     @PostMapping
     public ResponseEntity<?> addClub(@RequestBody ClubCreateRequest request) {
         var createdClub = service.addClub(request.name(), request.address(), request.whenOpen());
-        return ResponseEntity.created(URI.create("/api/clubs" + createdClub.id())).body(createdClub);
+        return ResponseEntity.created(URI.create("/api/clubs" + createdClub.getId())).body(createdClub);
     }
 
     @PatchMapping(path = "{id}")

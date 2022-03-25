@@ -24,11 +24,11 @@ public class EventRepository {
     }
 
     public Set<Event> eventsByClub(int clubId) {
-        return events.values().stream().filter(e -> e.clubId() == clubId).collect(Collectors.toSet());
+        return events.values().stream().filter(e -> e.getClubId() == clubId).collect(Collectors.toSet());
     }
 
     public Set<Event> eventsByCoach(int coachId) {
-        return events.values().stream().filter(e -> e.coachId() == coachId).collect(Collectors.toSet());
+        return events.values().stream().filter(e -> e.getCoachId() == coachId).collect(Collectors.toSet());
     }
 
     public Event addEvent(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {

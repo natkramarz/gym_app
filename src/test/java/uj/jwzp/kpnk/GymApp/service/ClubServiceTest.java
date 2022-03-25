@@ -66,9 +66,9 @@ public class ClubServiceTest {
 
     @Test
     public void addValidClub() {
-        given(clubRepository.addClub(club.name(), club.address(), club.whenOpen())).willReturn(club);
+        given(clubRepository.addClub(club.getName(), club.getAddress(), club.getWhenOpen())).willReturn(club);
 
-        var serviceClub = clubService.addClub(club.name(), club.address(), club.whenOpen());
+        var serviceClub = clubService.addClub(club.getName(), club.getAddress(), club.getWhenOpen());
         Assertions.assertEquals(serviceClub, club);
     }
 
@@ -76,10 +76,10 @@ public class ClubServiceTest {
     public void modifyValidClub() {
         given(clubRepository.club(1)).willReturn(Optional.of(club));
 
-        var uut = new Club(1, "modified1", "modified2", club.whenOpen());
+        var uut = new Club(1, "modified1", "modified2", club.getWhenOpen());
         given(clubRepository.modifyClub(1, uut)).willReturn(uut);
 
-        var serviceClub = clubService.modifyClub(1, "modified1", "modified2", club.whenOpen());
+        var serviceClub = clubService.modifyClub(1, "modified1", "modified2", club.getWhenOpen());
 
         Assertions.assertEquals(serviceClub, uut);
     }
@@ -88,7 +88,7 @@ public class ClubServiceTest {
     public void modifyNonExistentClub() {
         given(clubRepository.club(2)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> clubService.modifyClub(2, "test", "test", club.whenOpen()))
+        assertThatThrownBy(() -> clubService.modifyClub(2, "test", "test", club.getWhenOpen()))
                 .isInstanceOf(ClubNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown club id: 2");
     }
@@ -147,8 +147,8 @@ public class ClubServiceTest {
         Map<DayOfWeek, OpeningHours> newOpeningHours = new HashMap<>();
         newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));
         newOpeningHours.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(13, 0), LocalTime.of(22, 0)));
-        assertThatThrownBy(() -> clubService.modifyClub(club.id(), club.name(), club.address(), newOpeningHours))
+        assertThatThrownBy(() -> clubService.modifyClub(club.getId(), club.getName(), club.getAddress(), newOpeningHours))
                 .isInstanceOf(ClubOpeningHoursException.class)
-                .hasFieldOrPropertyWithValue("message", "There are standing out events in club: " + club.id());
+                .hasFieldOrPropertyWithValue("message", "There are standing out events in club: " + club.getId());
     }
 }

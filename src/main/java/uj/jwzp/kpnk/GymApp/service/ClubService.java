@@ -1,9 +1,7 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
@@ -14,7 +12,6 @@ import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
 import java.time.DayOfWeek;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -45,7 +42,7 @@ public class ClubService {
         if (repository.club(id).isEmpty()) throw new ClubNotFoundException(id);
         Set<Event> events = eventService.eventsByClub(id);
         for (Event event: events) {
-            if (!eventService.isEventTimeBetweenClubOpeningHours(whenOpen, event.day(), event.time(), event.duration()))
+            if (!eventService.isEventTimeBetweenClubOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration()))
                 throw new ClubOpeningHoursException(id);
         }
         Club modified = new Club(id, name, address, whenOpen);

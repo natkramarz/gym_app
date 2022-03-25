@@ -1,25 +1,25 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventDurationException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventTimeException;
+import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -37,8 +37,8 @@ public class EventService {
     }
 
     public boolean isEventTimeBetweenClubOpeningHours(Map<DayOfWeek, OpeningHours> openingHoursMap, DayOfWeek day, LocalTime time, Duration duration) {
-        LocalTime clubFrom = openingHoursMap.get(day).from();
-        LocalTime clubTo = openingHoursMap.get(day).to();
+        LocalTime clubFrom = openingHoursMap.get(day).getFrom();
+        LocalTime clubTo = openingHoursMap.get(day).getTo();
         if (time.compareTo(clubFrom) >= 0) {
             if (Duration.between(time, clubTo).compareTo(duration) >= 0) return true;
             if (clubTo.compareTo(LocalTime.MAX) != 0) return false;
@@ -49,9 +49,13 @@ public class EventService {
 
     public Event addEvent(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
         if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
-        if (coachRepository.coach(coachId).isEmpty()) throw new CoachNotFoundException(coachId);
+        try {
+            coachRepository.getById(coachId);
+        } catch (EntityNotFoundException e){
+            throw new CoachNotFoundException(coachId);
+        }
         if (duration.compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException(title);
-        if (!isEventTimeBetweenClubOpeningHours(clubRepository.club(clubId).get().whenOpen(), day, time, duration)) throw new EventTimeException(title);
+        if (!isEventTimeBetweenClubOpeningHours(clubRepository.club(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTimeException(title);
         return repository.addEvent(title, day, time, duration, clubId, coachId);
     }
 
@@ -66,10 +70,15 @@ public class EventService {
     }
 
     public Set<Event> eventsByCoach(int coachId) {
-        if (coachRepository.coach(coachId).isEmpty()) throw new CoachNotFoundException(coachId);
+        try {
+            coachRepository.getById(coachId);
+        } catch (EntityNotFoundException e){
+            throw new CoachNotFoundException(coachId);
+        }
 
         return repository.eventsByCoach(coachId);
     }
+
 
     public Event event(int id) {
         return repository.event(id).orElseThrow(() -> new EventNotFoundException(id));
@@ -83,10 +92,14 @@ public class EventService {
 
     public Event modifyEvent(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
         if (repository.event(id).isEmpty()) throw new EventNotFoundException(id);
-        if (coachRepository.coach(coachId).isEmpty()) throw new CoachNotFoundException(id);
+        try {
+            coachRepository.getById(coachId);
+        } catch (EntityNotFoundException e){
+            throw new CoachNotFoundException(coachId);
+        }
         if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
         if (duration.compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException(title);
-        if (!isEventTimeBetweenClubOpeningHours(clubRepository.club(clubId).get().whenOpen(), day, time, duration)) throw new EventTimeException(title);
+        if (!isEventTimeBetweenClubOpeningHours(clubRepository.club(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTimeException(title);
 
         Event modified = new Event(id, title, day, time, duration, clubId, coachId);
         return repository.modifyEvent(id, modified);
