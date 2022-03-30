@@ -1,7 +1,11 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventDurationException;
@@ -105,5 +109,10 @@ public class EventService {
 
         Event modified = new Event(id, title, day, time, duration, clubId, coachId);
         return repository.save(modified);
+    }
+
+    public Page<Event> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        return repository.findAll(paging);
     }
 }

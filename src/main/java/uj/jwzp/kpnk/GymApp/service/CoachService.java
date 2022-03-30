@@ -1,6 +1,10 @@
 package uj.jwzp.kpnk.GymApp.service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
@@ -44,5 +48,10 @@ public class CoachService {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
         if (!eventService.eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
         repository.deleteById(id);
+    }
+
+    public Page<Coach> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        return repository.findAll(paging);
     }
 }

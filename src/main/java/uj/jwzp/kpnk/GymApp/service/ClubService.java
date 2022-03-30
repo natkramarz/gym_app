@@ -1,11 +1,16 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
+import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
@@ -56,5 +61,10 @@ public class ClubService {
         if (!eventService.eventsByClub(id).isEmpty()) throw new ClubHasEventException(id);
 
         repository.deleteById(id);
+    }
+
+    public Page<Club> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        return repository.findAll(paging);
     }
 }

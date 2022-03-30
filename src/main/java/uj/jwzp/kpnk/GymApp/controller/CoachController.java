@@ -1,6 +1,9 @@
 package uj.jwzp.kpnk.GymApp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
@@ -29,6 +32,11 @@ public class CoachController {
     @GetMapping(path = "{id}")
     public ResponseEntity<?> getCoach(@PathVariable int id) {
         return ResponseEntity.ok(service.coach(id));
+    }
+
+    @GetMapping(params = {"page", "size"})
+    public ResponseEntity<?> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
     }
 
     @PostMapping

@@ -1,53 +1,27 @@
-package uj.jwzp.kpnk.GymApp.model;
+package uj.jwzp.kpnk.GymApp.dto;
 
 import org.springframework.hateoas.RepresentationModel;
-
-import javax.persistence.*;
+import org.springframework.hateoas.server.core.Relation;
+import uj.jwzp.kpnk.GymApp.model.Club;
+import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import java.time.DayOfWeek;
 import java.util.Map;
 import java.util.Objects;
 
-@Entity
-public class Club extends RepresentationModel<Club> {
+@Relation(itemRelation = "club", collectionRelation = "clubs")
+public class ClubRepresentation extends RepresentationModel<ClubRepresentation> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-
-    @Column(updatable = false)
     private int id;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String address;
-
-    @ElementCollection
-    @MapKeyEnumerated(EnumType.STRING)
     private Map<DayOfWeek, OpeningHours> whenOpen;
-
-    public Club() {
-    }
-
-    public Club(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        this.id = id;
-        this.name = name;
-        this.address = address;
-        this.whenOpen = whenOpen;
-    }
-
-    public Club(String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        this.name = name;
-        this.address = address;
-        this.whenOpen = whenOpen;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Club club = (Club) o;
-        return id == club.id;
+        return id == club.getId();
     }
 
     @Override
