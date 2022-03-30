@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
 
+    /*
     private static Event event;
     private static Club club;
     private static Coach coach;
@@ -58,6 +59,7 @@ public class EventServiceTest {
         event = new Event(1, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1);
         event1 = new Event(2, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), event.getClubId(), event.getCoachId());
     }
+
 
     @Test
     public void getAllEventsWithOneClub() {
@@ -256,5 +258,5 @@ public class EventServiceTest {
                 .isInstanceOf(EventTimeException.class)
                 .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.getTitle());
     }
-
+*/
 }
