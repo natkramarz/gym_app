@@ -37,7 +37,7 @@ public class CoachController {
         return ResponseEntity.created(URI.create("/api/coaches/" + createdCoach.getId())).body(createdCoach);
     }
 
-    @PatchMapping(path = "{id}")
+    @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyCoach(@PathVariable int id, @RequestBody CoachCreateRequest request) {
         return ResponseEntity.ok(service.modifyCoach(id, request.firstName(), request.lastName(), request.yearOfBirth()));
     }

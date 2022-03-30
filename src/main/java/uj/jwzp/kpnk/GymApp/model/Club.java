@@ -6,40 +6,18 @@ import java.util.Map;
 import java.util.Objects;
 
 @Entity
-@Table(
-        name = "club"
-)
 public class Club {
 
     @Id
-    @SequenceGenerator(
-            name = "club_sequence",
-            sequenceName = "club_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "club_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    @Column(
-            name = "id",
-            updatable = false
-    )
+    @Column(updatable = false)
     private int id;
 
-    @Column(
-            name = "name",
-            nullable = false,
-            columnDefinition = "TEXT"
-    )
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
 
-    @Column(
-            name = "address",
-            nullable = false,
-            columnDefinition = "TEXT"
-    )
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String address;
 
     @ElementCollection
@@ -51,6 +29,12 @@ public class Club {
 
     public Club(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
         this.id = id;
+        this.name = name;
+        this.address = address;
+        this.whenOpen = whenOpen;
+    }
+
+    public Club(String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
         this.name = name;
         this.address = address;
         this.whenOpen = whenOpen;

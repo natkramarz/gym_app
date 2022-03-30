@@ -11,6 +11,7 @@ import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
 import java.time.DayOfWeek;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,33 +27,34 @@ public class ClubService {
         this.eventService = eventService;
     }
 
-    public Set<Club> allClubs() {
-        return repository.allClubs();
+    public List<Club> allClubs() {
+        return repository.findAll();
     }
 
     public Club club(int id) {
-        return repository.club(id).orElseThrow(() -> new ClubNotFoundException(id));
+        return repository.findById(id).orElseThrow(() -> new ClubNotFoundException(id));
     }
 
     public Club addClub(String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        return repository.addClub(name, address, whenOpen);
+        Club club = new Club(name, address, whenOpen);
+        return repository.save(club);
     }
 
     public Club modifyClub(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        if (repository.club(id).isEmpty()) throw new ClubNotFoundException(id);
-        Set<Event> events = eventService.eventsByClub(id);
+        if (repository.findById(id).isEmpty()) throw new ClubNotFoundException(id);
+        List<Event> events = eventService.eventsByClub(id);
         for (Event event: events) {
             if (!eventService.isEventTimeBetweenClubOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration()))
                 throw new ClubOpeningHoursException(id);
         }
         Club modified = new Club(id, name, address, whenOpen);
-        return repository.modifyClub(id, modified);
+        return repository.save(modified);
     }
 
     public void removeClub(int id) {
-        if (repository.club(id).isEmpty()) throw new ClubNotFoundException(id);
+        if (repository.findById(id).isEmpty()) throw new ClubNotFoundException(id);
         if (!eventService.eventsByClub(id).isEmpty()) throw new ClubHasEventException(id);
 
-        repository.removeClub(id);
+        repository.deleteById(id);
     }
 }

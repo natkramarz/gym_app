@@ -26,29 +26,22 @@ public class CoachService {
     }
 
     public Coach coach(int id) {
-        return Optional.of(repository.getById(id)).orElseThrow(() -> new CoachNotFoundException(id));
+        return repository.findById(id).orElseThrow(() -> new CoachNotFoundException(id));
     }
 
     public Coach addCoach(String firstName, String lastName, int yearOfBirth) {
-        return repository.addCoach(firstName, lastName, yearOfBirth);
+        Coach coach = new Coach(firstName, lastName, yearOfBirth);
+        return repository.save(coach);
     }
 
     public Coach modifyCoach(int id, String firstName, String lastName, int yearOfBirth) {
-        try {
-            Coach old = repository.getById(id);
-        } catch (EntityNotFoundException e){
-            throw new CoachNotFoundException(id);
-        }
+        if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
         Coach modified = new Coach(id, firstName, lastName, yearOfBirth);
         return repository.save(modified);
     }
 
     public void removeCoach(int id) {
-        try {
-            repository.getById(id);
-        } catch (EntityNotFoundException e){
-            throw new CoachNotFoundException(id);
-        }
+        if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
         if (!eventService.eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
         repository.deleteById(id);
     }

@@ -6,44 +6,18 @@ import java.util.Objects;
 
 
 @Entity
-@Table(
-        name = "coach"
-)
 public class Coach {
     @Id
-    @SequenceGenerator(
-            name = "coach_sequence",
-            sequenceName = "coach_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "coach_sequence"
-    )
-
-    @Column(
-            name = "id",
-            updatable = false
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
     private int id;
 
-    @Column(
-            name = "first_name",
-            nullable = false,
-            length = 50
-    )
+    @Column(nullable = false, length = 50)
     private String firstName;
-    @Column(
-            name = "last_name",
-            nullable = false,
-            length = 50
-    )
+    @Column( nullable = false, length = 50)
     private String lastName;
 
-    @Column(
-            name = "year_of_birth",
-            nullable = false
-    )
+    @Column(nullable = false)
     private int yearOfBirth;
 
     public Coach() {
@@ -51,6 +25,12 @@ public class Coach {
 
     public Coach(int id, String firstName, String lastName, int yearOfBirth) {
         this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.yearOfBirth = yearOfBirth;
+    }
+
+    public Coach(String firstName, String lastName, int yearOfBirth) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.yearOfBirth = yearOfBirth;

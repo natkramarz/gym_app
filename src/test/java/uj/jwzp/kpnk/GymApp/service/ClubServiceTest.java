@@ -51,7 +51,6 @@ public class ClubServiceTest {
 
     @Test
     public void getAllClubsWithOneClub() {
-        given(clubRepository.allClubs()).willReturn(Set.of(club));
         var clubs = clubService.allClubs();
 
         assertThat(clubs).containsExactly(club);
@@ -59,25 +58,21 @@ public class ClubServiceTest {
 
     @Test
     public void getAllClubsEmpty() {
-        given(clubRepository.allClubs()).willReturn(Collections.emptySet());
-
         Assertions.assertTrue(clubService.allClubs().isEmpty());
     }
 
     @Test
     public void addValidClub() {
-        given(clubRepository.addClub(club.getName(), club.getAddress(), club.getWhenOpen())).willReturn(club);
-
         var serviceClub = clubService.addClub(club.getName(), club.getAddress(), club.getWhenOpen());
         Assertions.assertEquals(serviceClub, club);
     }
 
     @Test
     public void modifyValidClub() {
-        given(clubRepository.club(1)).willReturn(Optional.of(club));
+        //given(clubRepository.club(1)).willReturn(Optional.of(club));
 
         var uut = new Club(1, "modified1", "modified2", club.getWhenOpen());
-        given(clubRepository.modifyClub(1, uut)).willReturn(uut);
+        //given(clubRepository.modifyClub(1, uut)).willReturn(uut);
 
         var serviceClub = clubService.modifyClub(1, "modified1", "modified2", club.getWhenOpen());
 
@@ -86,7 +81,7 @@ public class ClubServiceTest {
 
     @Test
     public void modifyNonExistentClub() {
-        given(clubRepository.club(2)).willReturn(Optional.empty());
+        given(clubRepository.findById(2)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> clubService.modifyClub(2, "test", "test", club.getWhenOpen()))
                 .isInstanceOf(ClubNotFoundException.class)
@@ -95,7 +90,7 @@ public class ClubServiceTest {
 
     @Test
     public void removeNonExistentClub() {
-        given(clubRepository.club(1)).willReturn(Optional.empty());
+        given(clubRepository.findById(1)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> clubService.removeClub(1))
                 .isInstanceOf(ClubNotFoundException.class)
@@ -104,8 +99,8 @@ public class ClubServiceTest {
 
     @Test
     public void removeClubWithEvents() {
-        given(clubRepository.club(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(Set.of(
+        given(clubRepository.findById(1)).willReturn(Optional.of(club));
+        /*given(eventService.eventsByClub(1)).willReturn(Set.of(
                 new Event(
                         1,
                         "test",
@@ -114,7 +109,7 @@ public class ClubServiceTest {
                         Duration.ofMinutes(5),
                         1,
                         1
-                )));
+                )));*/
 
         assertThatThrownBy(() -> clubService.removeClub(1))
                 .isInstanceOf(ClubHasEventException.class)
@@ -123,8 +118,8 @@ public class ClubServiceTest {
 
     @Test
     public void modifyClubWithEventsStandingOut() {
-        given(clubRepository.club(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(Set.of(
+        given(clubRepository.findById(1)).willReturn(Optional.of(club));
+        /*given(eventService.eventsByClub(1)).willReturn(Set.of(
                 new Event(
                         1,
                         "testEvent1",
@@ -142,7 +137,7 @@ public class ClubServiceTest {
                         Duration.ofHours(4),
                         1,
                         1
-                )));
+                )));*/
 
         Map<DayOfWeek, OpeningHours> newOpeningHours = new HashMap<>();
         newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));

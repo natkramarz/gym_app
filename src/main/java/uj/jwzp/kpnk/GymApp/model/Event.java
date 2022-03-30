@@ -7,53 +7,41 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Table(
-        name = "event"
-)
+@Table(name="events")
 public class Event {
 
     @Id
-    @SequenceGenerator(
-            name = "event_sequence",
-            sequenceName = "event_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "event_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    @Column(
-            name = "id",
-            updatable = false
-    )
+    @Column(updatable = false)
     private int id;
 
-    @Column(
-            name = "title",
-            nullable = false,
-            columnDefinition = "TEXT"
-    )
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
 
     @Enumerated(EnumType.STRING)
     private DayOfWeek day;
 
-    @Column(name = "time", columnDefinition = "TIME")
+    @Column(columnDefinition = "TIME")
     private LocalTime time;
 
-
-    @Column(name = "duration")
     private Duration duration;
 
-    @Column(name = "club_id")
     private int clubId;
 
-    @Column(name = "coach_id")
     private int coachId;
 
     public Event() {
 
+    }
+
+    public Event(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
+        this.title = title;
+        this.day = day;
+        this.time = time;
+        this.duration = duration;
+        this.clubId = clubId;
+        this.coachId = coachId;
     }
 
     public Event(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {

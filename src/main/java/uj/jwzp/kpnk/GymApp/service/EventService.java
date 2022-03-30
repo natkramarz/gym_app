@@ -18,6 +18,7 @@ import javax.persistence.EntityNotFoundException;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -48,60 +49,61 @@ public class EventService {
     }
 
     public Event addEvent(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
-        if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
+        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
         try {
             coachRepository.getById(coachId);
         } catch (EntityNotFoundException e){
             throw new CoachNotFoundException(coachId);
         }
         if (duration.compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException(title);
-        if (!isEventTimeBetweenClubOpeningHours(clubRepository.club(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTimeException(title);
-        return repository.addEvent(title, day, time, duration, clubId, coachId);
+        if (!isEventTimeBetweenClubOpeningHours(clubRepository.findById(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTimeException(title);
+        Event event = new Event(title, day, time, duration, clubId, coachId);
+        return repository.save(event);
     }
 
-    public Set<Event> allEvents() {
-        return repository.allEvents();
+    public List<Event> allEvents() {
+        return repository.findAll();
     }
 
-    public Set<Event> eventsByClub(int clubId) {
-        if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
+    public List<Event> eventsByClub(int clubId) {
+        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
 
-        return repository.eventsByClub(clubId);
+        return repository.findByClubId(clubId);
     }
 
-    public Set<Event> eventsByCoach(int coachId) {
+    public List<Event> eventsByCoach(int coachId) {
         try {
             coachRepository.getById(coachId);
         } catch (EntityNotFoundException e){
             throw new CoachNotFoundException(coachId);
         }
 
-        return repository.eventsByCoach(coachId);
+        return repository.findByCoachId(coachId);
     }
 
 
     public Event event(int id) {
-        return repository.event(id).orElseThrow(() -> new EventNotFoundException(id));
+        return repository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 
     public void removeEvent(int id) {
-        if (repository.event(id).isEmpty()) throw new EventNotFoundException(id);
+        if (repository.findById(id).isEmpty()) throw new EventNotFoundException(id);
 
-        repository.removeEvent(id);
+        repository.deleteById(id);
     }
 
     public Event modifyEvent(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
-        if (repository.event(id).isEmpty()) throw new EventNotFoundException(id);
+        if (repository.findById(id).isEmpty()) throw new EventNotFoundException(id);
         try {
             coachRepository.getById(coachId);
         } catch (EntityNotFoundException e){
             throw new CoachNotFoundException(coachId);
         }
-        if (clubRepository.club(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
+        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
         if (duration.compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException(title);
-        if (!isEventTimeBetweenClubOpeningHours(clubRepository.club(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTimeException(title);
+        if (!isEventTimeBetweenClubOpeningHours(clubRepository.findById(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTimeException(title);
 
         Event modified = new Event(id, title, day, time, duration, clubId, coachId);
-        return repository.modifyEvent(id, modified);
+        return repository.save(modified);
     }
 }
