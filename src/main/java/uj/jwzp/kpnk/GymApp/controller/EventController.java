@@ -27,6 +27,11 @@ public class EventController {
         return service.eventsByCoach(coachId.get()).stream().toList();
     }
 
+    @GetMapping(params = {"page", "size"})
+    public ResponseEntity<?> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
+    }
+
     @GetMapping("{id}")
     public ResponseEntity<?> getEvent(@PathVariable int id) {
         return ResponseEntity.ok(service.event(id));
@@ -43,7 +48,7 @@ public class EventController {
                 request.coachId()
         );
 
-        return ResponseEntity.created(URI.create("/api/events/" + createdEvent.id())).body(createdEvent);
+        return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
 
     @PatchMapping(path = "{id}")

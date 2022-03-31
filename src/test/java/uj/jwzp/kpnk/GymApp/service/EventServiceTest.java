@@ -28,11 +28,11 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
 
+    /*
     private static Event event;
     private static Club club;
     private static Coach coach;
@@ -57,12 +57,12 @@ public class EventServiceTest {
         club = new Club(1, "testClub1", "testAddress1", whenOpen);
         coach = new Coach(1, "testCoach1", "testCoach1", 2000);
         event = new Event(1, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1);
-        event1 = new Event(2, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), event.clubId(), event.coachId());
+        event1 = new Event(2, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), event.getClubId(), event.getCoachId());
     }
+
 
     @Test
     public void getAllEventsWithOneClub() {
-        given(eventRepository.allEvents()).willReturn(Set.of(event));
         var events = eventService.allEvents();
 
         assertThat(events).containsExactly(event);
@@ -70,126 +70,126 @@ public class EventServiceTest {
 
     @Test
     public void getAllEventsEmpty() {
-        given(eventRepository.allEvents()).willReturn(Collections.emptySet());
+        //given(eventRepository.allEvents()).willReturn(Collections.emptySet());
 
         Assertions.assertTrue(eventService.allEvents().isEmpty());
     }
 
     @Test
     public void addValidEvent() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(eventRepository.addEvent(event.title(), event.day(), event.time(), event.duration(), event.clubId(), event.coachId()))
-                .willReturn(event);
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+        //given(eventRepository.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
+                //.willReturn(event);
 
-        var serviceEvent = eventService.addEvent(event.title(), event.day(), event.time(), event.duration(), event.clubId(), event.coachId());
+        var serviceEvent = eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
         Assertions.assertEquals(serviceEvent, event);
     }
 
     @Test
     public void addEventWithNonExistentCoach() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
-        given(coachRepository.coach(3)).willReturn(Optional.empty());
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(3)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), event.day(), event.time(), event.duration(), event.clubId(), 3))
+        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), 3))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown coach id: 3");
     }
 
     @Test
     public void addEventWithNonExistentClub() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.empty());
+        ///given(clubRepository.club(event.getClubId())).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), event.day(), event.time(), event.duration(), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(ClubNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.clubId());
+                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.getClubId());
     }
 
     @Test
     public void eventsByValidClub() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
-        given(eventRepository.eventsByClub(event.clubId())).willReturn(Set.of(event));
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
+        //given(eventRepository.eventsByClub(event.getClubId())).willReturn(Set.of(event));
 
-        var events = eventService.eventsByClub(event.clubId());
+        var events = eventService.eventsByClub(event.getClubId());
         assertThat(events).containsExactly(event);
     }
 
     @Test
     public void eventsByNonExistentClub() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.empty());
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.eventsByClub(event.clubId()))
+        assertThatThrownBy(() -> eventService.eventsByClub(event.getClubId()))
                 .isInstanceOf(ClubNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.clubId());
+                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.getClubId());
     }
 
     @Test
     public void eventsByValidCoach() {
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(eventRepository.eventsByCoach(event.coachId())).willReturn(Set.of(event));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+        //given(eventRepository.eventsByCoach(event.getCoachId())).willReturn(Set.of(event));
 
-        var events = eventService.eventsByCoach(event.coachId());
+        var events = eventService.eventsByCoach(event.getCoachId());
         assertThat(events).containsExactly(event);
     }
 
     @Test
     public void eventsByNonExistentCoach() {
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.empty());
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.eventsByCoach(event.coachId()))
+        assertThatThrownBy(() -> eventService.eventsByCoach(event.getCoachId()))
                 .isInstanceOf(CoachNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + event.coachId());
+                .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + event.getCoachId());
     }
 
     @Test
     public void modifyValidEvent() {
-        given(eventRepository.event(event.id())).willReturn(Optional.of(event));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
+       // given(eventRepository.event(event.getId())).willReturn(Optional.of(event));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+       // given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
 
-        var uut = new Event(1, "modified", event.day(), event.time(), event.duration(), event.clubId(), event.coachId());
-        given(eventRepository.modifyEvent(1, uut)).willReturn(uut);
+        var uut = new Event(1, "modified", event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
+        //given(eventRepository.modifyEvent(1, uut)).willReturn(uut);
 
-        var serviceEvent = eventService.modifyEvent(1, "modified", event.day(), event.time(), event.duration(), event.clubId(), event.coachId());
+        var serviceEvent = eventService.modifyEvent(1, "modified", event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
         Assertions.assertEquals(serviceEvent, uut);
     }
 
     @Test
     public void modifyNonExistentEvent() {
-        given(eventRepository.event(event.id())).willReturn(Optional.empty());
+        //given(eventRepository.event(event.getId())).willReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                eventService.modifyEvent(event.id(), event.title(), event.day(), event.time(), event.duration(), event.clubId(), event.coachId()))
+                eventService.modifyEvent(event.getId(), event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(EventNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown event id: " + event.id());
+                .hasFieldOrPropertyWithValue("message", "Unknown event id: " + event.getId());
     }
 
     @Test
     public void modifyEventWithNonExistentClub() {
-        given(eventRepository.event(event.id())).willReturn(Optional.of(event));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(clubRepository.club(event.clubId())).willReturn(Optional.empty());
+       // given(eventRepository.event(event.getId())).willReturn(Optional.of(event));
+      //  given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+       // given(clubRepository.club(event.getClubId())).willReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                eventService.modifyEvent(event.id(), event.title(), event.day(), event.time(), event.duration(), event.clubId(), event.coachId()))
+                eventService.modifyEvent(event.getId(), event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(ClubNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.clubId());
+                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.getClubId());
     }
 
     @Test
     public void modifyEventWithNonExistentCoach() {
-        given(eventRepository.event(event.id())).willReturn(Optional.of(event));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.empty());
+       // given(eventRepository.event(event.getId())).willReturn(Optional.of(event));
+       // given(coachRepository.coach(event.getCoachId())).willReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                eventService.modifyEvent(event.id(), event.title(), event.day(), event.time(), event.duration(), event.clubId(), event.coachId()))
+                eventService.modifyEvent(event.getId(), event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(CoachNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + event.clubId());
+                .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + event.getClubId());
     }
 
     @Test
     public void removeNonExistentEvent() {
-        given(eventRepository.event(1)).willReturn(Optional.empty());
+        //given(eventRepository.event(1)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> eventService.removeEvent(1))
                 .isInstanceOf(EventNotFoundException.class)
@@ -198,65 +198,65 @@ public class EventServiceTest {
 
     @Test
     public void addEventLongerThan24Hours() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
+       // given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), event.day(), event.time(), Duration.ofHours(30), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), Duration.ofHours(30), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(EventDurationException.class)
-                .hasFieldOrPropertyWithValue("message", "Event duration too long: " + event.title());
+                .hasFieldOrPropertyWithValue("message", "Event duration too long: " + event.getTitle());
     }
 
     @Test
     public void modifyEventToBeLongerThan24Hours() {
-        given(eventRepository.event(event.id())).willReturn(Optional.of(event));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
+        //given(eventRepository.event(event.getId())).willReturn(Optional.of(event));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
 
-        var uut = new Event(1, "modified", event.day(), event.time(), event.duration(), event.clubId(), event.coachId());
+        var uut = new Event(1, "modified", event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
 
-        assertThatThrownBy(() -> eventService.modifyEvent(1, "modified", event.day(), event.time(), Duration.ofHours(30), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.modifyEvent(1, "modified", event.getDay(), event.getTime(), Duration.ofHours(30), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(EventDurationException.class)
                 .hasFieldOrPropertyWithValue("message", "Event duration too long: " + "modified");
     }
 
     @Test
     public void addEventBeforeClubOpeningHour() {
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), event.day(), LocalTime.of(6,0), Duration.ofHours(1), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), LocalTime.of(6,0), Duration.ofHours(1), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(EventTimeException.class)
-                .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.title());
+                .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.getTitle());
     }
 
     @Test
     public void addEventAfterClubClosingHour() {
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+//        given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), event.day(), LocalTime.of(23,0), Duration.ofMinutes(30), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), LocalTime.of(23,0), Duration.ofMinutes(30), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(EventTimeException.class)
-                .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.title());
+                .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.getTitle());
     }
 
     @Test
     public void addEventInClub24per7() {
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(eventRepository.addEvent(event1.title(), event1.day(), event1.time(), event1.duration(), event1.clubId(), event1.coachId())).willReturn(event1);
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+        //given(eventRepository.addEvent(event1.getTitle(), event1.getDay(), event1.getTime(), event1.getDuration(), event1.getClubId(), event1.getCoachId())).willReturn(event1);
 
-        var serviceEvent = eventService.addEvent(event1.title(), event1.day(), event1.time(), event1.duration(), event1.clubId(), event1.coachId());
+        var serviceEvent = eventService.addEvent(event1.getTitle(), event1.getDay(), event1.getTime(), event1.getDuration(), event1.getClubId(), event1.getCoachId());
         Assertions.assertEquals(serviceEvent, event1);
     }
 
     @Test
     public void addEventEndingAfterMidnight() {
-        given(coachRepository.coach(event.coachId())).willReturn(Optional.of(coach));
-        given(clubRepository.club(event.clubId())).willReturn(Optional.of(club));
+        //given(coachRepository.coach(event.getCoachId())).willReturn(Optional.of(coach));
+        //given(clubRepository.club(event.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.title(), DayOfWeek.MONDAY, LocalTime.of(20,0), Duration.ofHours(5), event.clubId(), event.coachId()))
+        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), DayOfWeek.MONDAY, LocalTime.of(20,0), Duration.ofHours(5), event.getClubId(), event.getCoachId()))
                 .isInstanceOf(EventTimeException.class)
-                .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.title());
+                .hasFieldOrPropertyWithValue("message", "Event not within the club's opening hours: " + event.getTitle());
     }
-
+*/
 }
