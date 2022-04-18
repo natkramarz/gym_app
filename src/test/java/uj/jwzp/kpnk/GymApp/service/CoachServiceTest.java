@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
+import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
 import java.util.Collections;
@@ -18,14 +20,17 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 public class CoachServiceTest {
-/*
+
     private static Coach coach;
     @Mock
     private CoachRepository coachRepository;
+    @Mock
+    private EventService eventService;
     @InjectMocks
     private CoachService coachService;
 
@@ -52,18 +57,16 @@ public class CoachServiceTest {
 
     @Test
     public void addValidCoach() {
-        //given(coachRepository.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth())).willReturn(coach);
+        given(coachService.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth())).willReturn(coach);
 
         var serviceCoach = coachService.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth());
         Assertions.assertEquals(serviceCoach, coach);
     }
-
     @Test
     public void modifyValidCoach() {
-        //given(coachRepository.coach(1)).willReturn(Optional.of(coach));
-
+        given(coachRepository.findById(1)).willReturn(Optional.of(coach));
         Coach uut = new Coach(1, "modified1", "modified2", 2001);
-        //given(coachRepository.modifyCoach(1, uut)).willReturn(uut);
+        given(coachRepository.save(uut)).willReturn(uut);
 
         Coach serviceCoach = coachService.modifyCoach(1, "modified1", "modified2", 2001);
 
@@ -72,7 +75,7 @@ public class CoachServiceTest {
 
     @Test
     public void modifyNonExistentClub() {
-        //given(coachRepository.coach(2)).willReturn(Optional.empty());
+        given(coachRepository.findById(2)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> coachService.modifyCoach(2, "test", "test", 2000))
                 .isInstanceOf(CoachNotFoundException.class)
@@ -81,7 +84,7 @@ public class CoachServiceTest {
 
     @Test
     public void removeNonExistentCoach() {
-        //given(coachRepository.coach(1)).willReturn(Optional.empty());
+        given(coachRepository.findById(anyInt())).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> coachService.removeCoach(1))
                 .isInstanceOf(CoachNotFoundException.class)
@@ -90,6 +93,11 @@ public class CoachServiceTest {
 
     @Test
     public void removeCoachWithAssignedEvents() {
+        given(coachRepository.findById(1)).willReturn(Optional.of(coach));
+        given(eventService.eventsByCoach(1)).willReturn(List.of(new Event()));
 
-    }*/
+        assertThatThrownBy(() -> coachService.removeCoach(1))
+                .isInstanceOf(AssignedEventsException.class)
+                .hasMessageContaining("There are events assigned to");
+    }
 }

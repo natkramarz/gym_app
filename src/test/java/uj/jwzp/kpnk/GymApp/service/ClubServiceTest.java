@@ -27,7 +27,7 @@ import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 public class ClubServiceTest {
-/*
+
     private static Club club;
     @Mock
     private ClubRepository clubRepository;
@@ -37,21 +37,32 @@ public class ClubServiceTest {
     private CoachRepository coachRepository;
     @InjectMocks
     private ClubService clubService;
+    private static Map<DayOfWeek, OpeningHours> whenOpen;
+    private static Event event;
 
     @BeforeAll
     static void setUp() {
-        Map<DayOfWeek, OpeningHours> whenOpen = new HashMap<>();
+        whenOpen = new HashMap<>();
         whenOpen.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
         whenOpen.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
         whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
         club = new Club(1, "testClub1", "testAddress1", whenOpen);
+        event = new Event(
+                1,
+                "testEvent1",
+                DayOfWeek.MONDAY,
+                LocalTime.of(8,0),
+                Duration.ofHours(2),
+                1,
+                1
+        );
     }
-
 
     @Test
     public void getAllClubsWithOneClub() {
+        given(clubRepository.findAll()).willReturn(List.of(club));
         var clubs = clubService.allClubs();
 
         assertThat(clubs).containsExactly(club);
@@ -64,16 +75,19 @@ public class ClubServiceTest {
 
     @Test
     public void addValidClub() {
-        var serviceClub = clubService.addClub(club.getName(), club.getAddress(), club.getWhenOpen());
-        Assertions.assertEquals(serviceClub, club);
+        var clubWithIdZero = new Club(0, "testClub", "testAddress", whenOpen);
+        given(clubRepository.save(clubWithIdZero)).willReturn(clubWithIdZero);
+        var serviceClub = clubService.addClub(clubWithIdZero.getName(), clubWithIdZero.getAddress(), clubWithIdZero.getWhenOpen());
+        Assertions.assertEquals(serviceClub, clubWithIdZero);
     }
 
     @Test
     public void modifyValidClub() {
-        //given(clubRepository.club(1)).willReturn(Optional.of(club));
-
+        given(clubRepository.findById(1)).willReturn(Optional.of(club));
+        given(eventService.eventsByClub(1)).willReturn(List.of(event));
+        given(eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration())).willReturn(true);
         var uut = new Club(1, "modified1", "modified2", club.getWhenOpen());
-        //given(clubRepository.modifyClub(1, uut)).willReturn(uut);
+        given(clubRepository.save(uut)).willReturn(uut);
 
         var serviceClub = clubService.modifyClub(1, "modified1", "modified2", club.getWhenOpen());
 
@@ -101,16 +115,7 @@ public class ClubServiceTest {
     @Test
     public void removeClubWithEvents() {
         given(clubRepository.findById(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(Set.of(
-                new Event(
-                        1,
-                        "test",
-                        DayOfWeek.MONDAY,
-                        LocalTime.NOON,
-                        Duration.ofMinutes(5),
-                        1,
-                        1
-                )));
+        given(eventService.eventsByClub(1)).willReturn(List.of(new Event()));
 
         assertThatThrownBy(() -> clubService.removeClub(1))
                 .isInstanceOf(ClubHasEventException.class)
@@ -120,32 +125,18 @@ public class ClubServiceTest {
     @Test
     public void modifyClubWithEventsStandingOut() {
         given(clubRepository.findById(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(Set.of(
-                new Event(
-                        1,
-                        "testEvent1",
-                        DayOfWeek.MONDAY,
-                        LocalTime.of(8,0),
-                        Duration.ofHours(2),
-                        1,
-                        1
-                ),
-                new Event(
-                        1,
-                        "testEvent2",
-                        DayOfWeek.TUESDAY,
-                        LocalTime.of(12,0),
-                        Duration.ofHours(4),
-                        1,
-                        1
-                )));
+
+        given(eventService.eventsByClub(1)).willReturn(List.of(event));
 
         Map<DayOfWeek, OpeningHours> newOpeningHours = new HashMap<>();
         newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));
         newOpeningHours.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(13, 0), LocalTime.of(22, 0)));
+
+        given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getTime(), event.getDuration())).willReturn(false);
+
         assertThatThrownBy(() -> clubService.modifyClub(club.getId(), club.getName(), club.getAddress(), newOpeningHours))
                 .isInstanceOf(ClubOpeningHoursException.class)
-                .hasFieldOrPropertyWithValue("message", "There are standing out events in club: " + club.getId());
-    }*/
+                .hasMessageContaining("standing out events");
+    }
 
 }

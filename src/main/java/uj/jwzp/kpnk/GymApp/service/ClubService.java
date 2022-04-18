@@ -10,7 +10,6 @@ import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
@@ -18,7 +17,6 @@ import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class ClubService {
@@ -49,7 +47,7 @@ public class ClubService {
         if (repository.findById(id).isEmpty()) throw new ClubNotFoundException(id);
         List<Event> events = eventService.eventsByClub(id);
         for (Event event: events) {
-            if (!eventService.isEventTimeBetweenClubOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration()))
+            if (!eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration()))
                 throw new ClubOpeningHoursException(id);
         }
         Club modified = new Club(id, name, address, whenOpen);
