@@ -31,6 +31,8 @@ public class Event {
 
     private int coachId;
 
+    private int peopleLimit;
+
     public Event() {
 
     }
@@ -139,5 +141,13 @@ public class Event {
 
     public void setCoachId(int coachId) {
         this.coachId = coachId;
+    }
+
+    public int getPeopleLimit() {
+        return peopleLimit;
+    }
+
+    public void setPeopleLimit(int peopleLimit) {
+        this.peopleLimit = peopleLimit;
     }
 }
