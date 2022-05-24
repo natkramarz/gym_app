@@ -1,5 +1,7 @@
 package uj.jwzp.kpnk.GymApp.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
@@ -13,6 +15,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
+
+    Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     private final EventService service;
 
@@ -47,23 +51,23 @@ public class EventController {
                 request.clubId(),
                 request.coachId()
         );
-
+        logger.info("Created event: {}", createdEvent);
         return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
 
     @PatchMapping(path = "{id}")
     public ResponseEntity<?> modifyEvent(@PathVariable int id, @RequestBody EventCreateRequest request) {
-        return ResponseEntity.ok(
-                service.modifyEvent(
-                        id,
-                        request.title(),
-                        request.day(),
-                        request.time(),
-                        request.duration(),
-                        request.clubId(),
-                        request.coachId()
-                )
+        var modifiedEvent = service.modifyEvent(
+                id,
+                request.title(),
+                request.day(),
+                request.time(),
+                request.duration(),
+                request.clubId(),
+                request.coachId()
         );
+        logger.info("Modified event: {}", modifiedEvent);
+        return ResponseEntity.ok(modifiedEvent);
     }
 
     @DeleteMapping(path = "{id}")
