@@ -12,7 +12,6 @@ public class Club extends RepresentationModel<Club> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(updatable = false)
     private int id;
 
