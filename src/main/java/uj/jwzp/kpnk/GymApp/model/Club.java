@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Entity
+@Table(name="club")
 public class Club extends RepresentationModel<Club> {
 
     @Id

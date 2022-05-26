@@ -11,7 +11,7 @@ import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Event;
+import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
@@ -32,13 +32,13 @@ public class ClubServiceTest {
     @Mock
     private ClubRepository clubRepository;
     @Mock
-    private EventService eventService;
+    private EventTemplateService eventTemplateService;
     @Mock
     private CoachRepository coachRepository;
     @InjectMocks
     private ClubService clubService;
     private static Map<DayOfWeek, OpeningHours> whenOpen;
-    private static Event event;
+    private static EventTemplate eventTemplate;
 
     @BeforeAll
     static void setUp() {
@@ -49,7 +49,7 @@ public class ClubServiceTest {
         whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
         club = new Club(1, "testClub1", "testAddress1", whenOpen);
-        event = new Event(
+        eventTemplate = new EventTemplate(
                 1,
                 "testEvent1",
                 DayOfWeek.MONDAY,
@@ -84,8 +84,8 @@ public class ClubServiceTest {
     @Test
     public void modifyValidClub() {
         given(clubRepository.findById(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(List.of(event));
-        given(eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration())).willReturn(true);
+        given(eventTemplateService.eventTemplatesByClub(1)).willReturn(List.of(eventTemplate));
+        given(eventTemplateService.isEventTemplateBetweenOpeningHours(whenOpen, eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration())).willReturn(true);
         var uut = new Club(1, "modified1", "modified2", club.getWhenOpen());
         given(clubRepository.save(uut)).willReturn(uut);
 
@@ -115,7 +115,7 @@ public class ClubServiceTest {
     @Test
     public void removeClubWithEvents() {
         given(clubRepository.findById(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(List.of(new Event()));
+        given(eventTemplateService.eventTemplatesByClub(1)).willReturn(List.of(new EventTemplate()));
 
         assertThatThrownBy(() -> clubService.removeClub(1))
                 .isInstanceOf(ClubHasEventException.class)
@@ -126,13 +126,13 @@ public class ClubServiceTest {
     public void modifyClubWithEventsStandingOut() {
         given(clubRepository.findById(1)).willReturn(Optional.of(club));
 
-        given(eventService.eventsByClub(1)).willReturn(List.of(event));
+        given(eventTemplateService.eventTemplatesByClub(1)).willReturn(List.of(eventTemplate));
 
         Map<DayOfWeek, OpeningHours> newOpeningHours = new HashMap<>();
         newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));
         newOpeningHours.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(13, 0), LocalTime.of(22, 0)));
 
-        given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getTime(), event.getDuration())).willReturn(false);
+        given(eventTemplateService.isEventTemplateBetweenOpeningHours(newOpeningHours, eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration())).willReturn(false);
 
         assertThatThrownBy(() -> clubService.modifyClub(club.getId(), club.getName(), club.getAddress(), newOpeningHours))
                 .isInstanceOf(ClubOpeningHoursException.class)

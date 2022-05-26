@@ -3,141 +3,59 @@ package uj.jwzp.kpnk.GymApp.model;
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Table(name="events")
-public class Event {
+@Table(name="event")
+public class Event extends EventTemplate {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "DATE")
+    LocalDate eventDate;
 
-    @Column(updatable = false)
-    private int id;
+    public Event(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, LocalDate eventDate) {
+        super(id, title, day, time, duration, clubId, coachId);
+        this.eventDate = eventDate;
+    }
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String title;
-
-    @Enumerated(EnumType.STRING)
-    private DayOfWeek day;
-
-    @Column(columnDefinition = "TIME")
-    private LocalTime time;
-
-    private Duration duration;
-
-    private int clubId;
-
-    private int coachId;
+    public Event(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, LocalDate eventDate) {
+        super(title, day, time, duration, clubId, coachId);
+        this.eventDate = eventDate;
+    }
 
     public Event() {
-
     }
 
-    public Event(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
-        this.title = title;
-        this.day = day;
-        this.time = time;
-        this.duration = duration;
-        this.clubId = clubId;
-        this.coachId = coachId;
+    public LocalDate getEventDate() {
+        return eventDate;
     }
 
-    public Event(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
-        this.id = id;
-        this.title = title;
-        this.day = day;
-        this.time = time;
-        this.duration = duration;
-        this.clubId = clubId;
-        this.coachId = coachId;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public DayOfWeek getDay() {
-        return day;
-    }
-
-    public LocalTime getTime() {
-        return time;
-    }
-
-    public Duration getDuration() {
-        return duration;
-    }
-
-    public int getClubId() {
-        return clubId;
-    }
-
-    public int getCoachId() {
-        return coachId;
+    public void setEventDate(LocalDate eventDate) {
+        this.eventDate = eventDate;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Event) obj;
-        return this.id == that.id &&
-                Objects.equals(this.title, that.title) &&
-                Objects.equals(this.day, that.day) &&
-                Objects.equals(this.time, that.time) &&
-                Objects.equals(this.duration, that.duration) &&
-                this.clubId == that.clubId &&
-                this.coachId == that.coachId;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Event event = (Event) o;
+        return eventDate.equals(event.eventDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, day, time, duration, clubId, coachId);
+        return Objects.hash(super.hashCode(), eventDate);
     }
 
     @Override
     public String toString() {
-        return "Event[" +
-                "id=" + id + ", " +
-                "title=" + title + ", " +
-                "day=" + day + ", " +
-                "time=" + time + ", " +
-                "duration=" + duration + ", " +
-                "clubId=" + clubId + ", " +
-                "coachId=" + coachId + ']';
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDay(DayOfWeek day) {
-        this.day = day;
-    }
-
-    public void setTime(LocalTime time) {
-        this.time = time;
-    }
-
-    public void setDuration(Duration duration) {
-        this.duration = duration;
-    }
-
-    public void setClubId(int clubId) {
-        this.clubId = clubId;
-    }
-
-    public void setCoachId(int coachId) {
-        this.coachId = coachId;
+        return "Event{" +
+                "eventDate=" + eventDate + "title=" + this.getTitle() + ", " +
+                "duration=" + this.getDuration() + ", " +
+                "clubId=" + this.getClubId() + ", " +
+                "coachId=" + this.getCoachId() +
+                '}';
     }
 }

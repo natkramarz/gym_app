@@ -10,13 +10,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.model.Event;
+import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -30,7 +28,7 @@ public class CoachServiceTest {
     @Mock
     private CoachRepository coachRepository;
     @Mock
-    private EventService eventService;
+    private EventTemplateService eventTemplateService;
     @InjectMocks
     private CoachService coachService;
 
@@ -94,7 +92,7 @@ public class CoachServiceTest {
     @Test
     public void removeCoachWithAssignedEvents() {
         given(coachRepository.findById(1)).willReturn(Optional.of(coach));
-        given(eventService.eventsByCoach(1)).willReturn(List.of(new Event()));
+        given(eventTemplateService.eventTemplatesByCoach(1)).willReturn(List.of(new EventTemplate()));
 
         assertThatThrownBy(() -> coachService.removeCoach(1))
                 .isInstanceOf(AssignedEventsException.class)
