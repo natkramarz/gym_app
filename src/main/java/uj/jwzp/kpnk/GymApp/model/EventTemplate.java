@@ -31,6 +31,8 @@ public class EventTemplate {
 
     private int coachId;
 
+    private int peopleLimit;
+
     public EventTemplate() {
 
     }
@@ -139,5 +141,13 @@ public class EventTemplate {
 
     public void setCoachId(int coachId) {
         this.coachId = coachId;
+    }
+
+    public int getPeopleLimit() {
+        return peopleLimit;
+    }
+
+    public void setPeopleLimit(int peopleLimit) {
+        this.peopleLimit = peopleLimit;
     }
 }

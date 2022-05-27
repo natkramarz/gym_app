@@ -2,7 +2,7 @@ package uj.jwzp.kpnk.GymApp.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
+import uj.jwzp.kpnk.GymApp.controller.request.EventTemplateCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.service.EventTemplateService;
 
@@ -38,7 +38,7 @@ public class EventTemplateController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addEventTemplate(@RequestBody EventCreateRequest request) {
+    public ResponseEntity<?> addEventTemplate(@RequestBody EventTemplateCreateRequest request) {
         EventTemplate createdEventTemplate = service.addEventTemplate(
                 request.title(),
                 request.day(),
@@ -48,11 +48,11 @@ public class EventTemplateController {
                 request.coachId()
         );
 
-        return ResponseEntity.created(URI.create("/api/events/" + createdEventTemplate.getId())).body(createdEventTemplate);
+        return ResponseEntity.created(URI.create("/api/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
     }
 
     @PatchMapping(path = "{id}")
-    public ResponseEntity<?> modifyEventTemplate(@PathVariable int id, @RequestBody EventCreateRequest request) {
+    public ResponseEntity<?> modifyEventTemplate(@PathVariable int id, @RequestBody EventTemplateCreateRequest request) {
         return ResponseEntity.ok(
                 service.modifyEventTemplate(
                         id,

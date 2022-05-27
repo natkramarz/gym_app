@@ -11,6 +11,7 @@ import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.service.CoachService;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -39,7 +40,7 @@ public class CoachController {
         return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
     }
 
-    @PostMapping
+    @PostMapping("/template")
     public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
         Coach createdCoach = service.addCoach(request.firstName(), request.lastName(), request.yearOfBirth());
         return ResponseEntity.created(URI.create("/api/coaches/" + createdCoach.getId())).body(createdCoach);
@@ -49,6 +50,8 @@ public class CoachController {
     public ResponseEntity<?> modifyCoach(@PathVariable int id, @RequestBody CoachCreateRequest request) {
         return ResponseEntity.ok(service.modifyCoach(id, request.firstName(), request.lastName(), request.yearOfBirth()));
     }
+
+
 
     @DeleteMapping(path = "{id}")
     public void removeCoach(@PathVariable int id) {
