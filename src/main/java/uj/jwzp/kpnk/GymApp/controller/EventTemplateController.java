@@ -66,9 +66,8 @@ public class EventTemplateController {
         );
     }
 
-    // TODO: change
     @DeleteMapping(path = "{id}")
-    public void removeCoach(@PathVariable int id) {
+    public void removeEventTemplate(@PathVariable int id) {
         service.removeEventTemplate(id);
     }
 }

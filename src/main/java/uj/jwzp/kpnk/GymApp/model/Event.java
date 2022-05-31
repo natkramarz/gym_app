@@ -24,6 +24,7 @@ public class Event extends EventTemplate {
         this.eventDate = eventDate;
     }
 
+
     public Event() {
     }
 

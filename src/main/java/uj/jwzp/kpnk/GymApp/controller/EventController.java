@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateEventWithTemplateRequest;
 import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
-import uj.jwzp.kpnk.GymApp.controller.request.EventTemplateCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.service.EventService;
 
@@ -43,7 +42,6 @@ public class EventController {
     public ResponseEntity<?> getEvent(@PathVariable int id) {
         return ResponseEntity.ok(service.event(id));
     }
-
     @PostMapping
     public ResponseEntity<?> addEvent(@RequestBody EventCreateRequest request) {
         Event createdEvent = service.addEvent(
@@ -59,7 +57,6 @@ public class EventController {
         return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
 
-    // TODO: add creating event by template
     @PostMapping("")
     public ResponseEntity<?> createEventWithTemplate(@RequestBody CreateEventWithTemplateRequest request) {
         Event createdEvent = service.createEventWithTemplate(
@@ -90,5 +87,16 @@ public class EventController {
     public ResponseEntity<?> findByDateAndClubId(@RequestParam("date") LocalDate date, @RequestParam("club_id") int clubId) {
         return ResponseEntity.ok(service.eventsByDateAndClubId(date, clubId));
     }
+
+    @DeleteMapping(path = "{id}")
+    public void cancelEvent(@PathVariable int id) {
+       service.cancelEvent(id);
+    }
+
+    @PatchMapping(path = "{id}")
+    public ResponseEntity<?> changeEventDate(@RequestBody LocalDate date, @PathVariable int eventId) {
+        return ResponseEntity.ok(service.changeEventDate(eventId, date));
+    }
+
 
 }

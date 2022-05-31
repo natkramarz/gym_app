@@ -8,6 +8,6 @@ import java.util.*;
 
 @Repository
 public interface EventTemplateRepository extends JpaRepository<EventTemplate, Integer> {
-    public List<EventTemplate> findByCoachId(Integer id);
-    public List<EventTemplate> findByClubId(Integer id);
+    List<EventTemplate> findByCoachId(Integer id);
+    List<EventTemplate> findByClubId(Integer id);
 }

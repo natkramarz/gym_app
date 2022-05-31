@@ -23,7 +23,7 @@ public class Registration {
         this.eventId = eventId;
     }
 
-    public Registration(String name, String surname, int eventId) {
+    public Registration(int eventId, String name, String surname) {
         this.name = name;
         this.surname = surname;
         this.eventId = eventId;
