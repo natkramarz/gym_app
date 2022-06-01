@@ -98,7 +98,6 @@ public class EventTemplateService {
     }
 
     public void deleteEventTemplatesByCoach(int coachId) {
-        if (repository.findByCoachId(coachId).isEmpty()) throw new EventTemplateNotFoundException(coachId);
         repository.deleteAllByCoachId(coachId);
     }
 

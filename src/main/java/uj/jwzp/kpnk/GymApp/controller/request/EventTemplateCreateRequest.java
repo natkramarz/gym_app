@@ -1,11 +1,20 @@
 package uj.jwzp.kpnk.GymApp.controller.request;
 
-import uj.jwzp.kpnk.GymApp.model.EventTemplate;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalTime;
 
-public record EventTemplateCreateRequest(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
+public record EventTemplateCreateRequest(
+        String title,
+        DayOfWeek day,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm") LocalTime time,
+        @JsonDeserialize(using = DurationDeserializer.class) Duration duration,
+        int clubId,
+        int coachId,
+        int peopleLimit
+    ) {
 
 }

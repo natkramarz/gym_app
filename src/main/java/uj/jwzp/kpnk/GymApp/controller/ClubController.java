@@ -52,7 +52,7 @@ public class ClubController {
         return ResponseEntity.created(URI.create("/api/v1/clubs" + createdClub.getId())).body(createdClub);
     }
 
-    @PatchMapping(path = "{id}")
+    @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
         return ResponseEntity.ok(service.modifyClub(id, request.name(), request.address(), request.whenOpen()));
     }

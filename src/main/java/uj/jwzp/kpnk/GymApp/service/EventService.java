@@ -109,8 +109,6 @@ public class EventService {
     }
 
     public List<Event> eventsByCoach(int coachId) {
-        if (coachRepository.findById(coachId).isEmpty()) throw new CoachNotFoundException(coachId);
-
         return repository.findByCoachId(coachId);
     }
 

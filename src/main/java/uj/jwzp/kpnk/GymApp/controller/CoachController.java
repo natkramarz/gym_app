@@ -40,7 +40,7 @@ public class CoachController {
         return service.findPaginated(pageNumber, pageSize);
     }
 
-    @PostMapping("/template")
+    @PostMapping()
     public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
         Coach createdCoach = service.addCoach(request.firstName(), request.lastName(), request.yearOfBirth());
         return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);

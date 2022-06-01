@@ -1,5 +1,6 @@
 package uj.jwzp.kpnk.GymApp.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class EventTemplateController {
 
     private final EventTemplateService service;
 
+    @Autowired
     public EventTemplateController(EventTemplateService service) {
         this.service = service;
     }
@@ -53,7 +55,7 @@ public class EventTemplateController {
         return ResponseEntity.created(URI.create("/api/v1/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
     }
 
-    @PatchMapping(path = "{id}")
+    @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyEventTemplate(@PathVariable int id, @RequestBody EventTemplateCreateRequest request) {
         return ResponseEntity.ok(
                 service.modifyEventTemplate(
