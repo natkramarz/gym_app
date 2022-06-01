@@ -10,28 +10,31 @@ import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
+import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
 import java.time.DayOfWeek;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ClubService {
 
     private final ClubRepository repository;
     private final EventTemplateService eventTemplateService;
+    private final EventService eventService;
 
     @Autowired
-    public ClubService(ClubRepository repository, EventTemplateService eventTemplateService) {
+    public ClubService(ClubRepository repository, EventTemplateService eventTemplateService, EventService eventService) {
         this.repository = repository;
         this.eventTemplateService = eventTemplateService;
+        this.eventService = eventService;
     }
 
-    public List<Club> allClubs() {
-        return repository.findAll();
+    public Set<Club> allClubs() {
+        return new HashSet(repository.findAll());
     }
 
     public Club club(int id) {
@@ -43,21 +46,37 @@ public class ClubService {
         return repository.save(club);
     }
 
+    private void deleteEventTemplatesByClub(Club club) {
+        List<EventTemplate> eventTemplates = eventTemplateService.eventTemplatesByClub(club.getId());
+        List<Integer> idsOfEventTemplatesToDelete = eventTemplates.stream()
+                .filter(eventTemplate -> !eventTemplateService.isEventTemplateBetweenOpeningHours(club.getWhenOpen(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration()))
+                .map(EventTemplate::getId)
+                .collect(Collectors.toList());
+        eventTemplateService.deleteEventTemplatesByClub(idsOfEventTemplatesToDelete);
+    }
+
     public Club modifyClub(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        if (repository.findById(id).isEmpty()) throw new ClubNotFoundException(id);
-        List<EventTemplate> eventTemplates = eventTemplateService.eventTemplatesByClub(id);
-        for (EventTemplate eventTemplate : eventTemplates) {
-            if (!eventTemplateService.isEventTemplateBetweenOpeningHours(whenOpen, eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration()))
-                throw new ClubOpeningHoursException(id);
-        }
+        Optional<Club> clubOptional = repository.findById(id);
+        if (clubOptional.isEmpty()) throw new ClubNotFoundException(id);
+
+        eventService.eventsByClub(id)
+            .forEach(event -> {
+                if (!eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration())) {
+                    throw new ClubOpeningHoursException(id);
+                }
+            });
+
+        deleteEventTemplatesByClub(clubOptional.get());
+
         Club modified = new Club(id, name, address, whenOpen);
         return repository.save(modified);
     }
 
-    public void removeClub(int id) {
-        if (repository.findById(id).isEmpty()) throw new ClubNotFoundException(id);
-        if (!eventTemplateService.eventTemplatesByClub(id).isEmpty()) throw new ClubHasEventException(id);
-
+    public void deleteClub(int id) {
+        Optional<Club> clubRequest = repository.findById(id);
+        if (clubRequest.isEmpty()) throw new ClubNotFoundException(id);
+        if (!eventService.eventsByClub(id).isEmpty()) throw new ClubHasEventException(id);
+        deleteEventTemplatesByClub(clubRequest.get());
         repository.deleteById(id);
     }
 

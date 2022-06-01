@@ -4,8 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uj.jwzp.kpnk.GymApp.controller.request.CreateEventWithTemplateRequest;
+import uj.jwzp.kpnk.GymApp.controller.request.EventCreateByTemplateRequest;
 import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
+import uj.jwzp.kpnk.GymApp.controller.request.ModifyEventRequest;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.service.EventService;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/v1/events")
 public class EventController {
 
     Logger logger = LoggerFactory.getLogger("jsonLogger");
@@ -44,27 +45,27 @@ public class EventController {
     }
     @PostMapping
     public ResponseEntity<?> addEvent(@RequestBody EventCreateRequest request) {
-        Event createdEvent = service.addEvent(
+        Event createdEvent = service.createEvent(
                 request.title(),
-                request.day(),
-                request.time(),
+                request.startTime(),
                 request.duration(),
                 request.clubId(),
                 request.coachId(),
-                request.eventDate()
+                request.eventDate(),
+                request.peopleLimit()
         );
         logger.info("Created event: {}", createdEvent);
         return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createEventWithTemplate(@RequestBody CreateEventWithTemplateRequest request) {
+    public ResponseEntity<?> createEventWithTemplate(@RequestBody EventCreateByTemplateRequest request) {
         Event createdEvent = service.createEventWithTemplate(
                 request.templateId(),
                 request.eventDate()
         );
         logger.info("Created event: {}", createdEvent);
-        return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
+        return ResponseEntity.created(URI.create("/api/v1/events/" + createdEvent.getId())).body(createdEvent);
     }
 
     @PatchMapping(path = "{id}")
@@ -72,12 +73,13 @@ public class EventController {
         var modifiedEvent = service.modifyEvent(
                 id,
                 request.title(),
-                request.day(),
-                request.time(),
+                request.eventDate().getDayOfWeek(),
+                request.startTime(),
                 request.duration(),
                 request.clubId(),
                 request.coachId(),
-                request.eventDate()
+                request.eventDate(),
+                request.peopleLimit()
         );
         logger.info("Modified event: {}", modifiedEvent);
         return ResponseEntity.ok(modifiedEvent);
@@ -89,13 +91,14 @@ public class EventController {
     }
 
     @DeleteMapping(path = "{id}")
-    public void cancelEvent(@PathVariable int id) {
-       service.cancelEvent(id);
+    public ResponseEntity<?> cancelEvent(@PathVariable int id) {
+       service.deleteEvent(id);
+       return ResponseEntity.noContent().build();
     }
 
     @PatchMapping(path = "{id}")
-    public ResponseEntity<?> changeEventDate(@RequestBody LocalDate date, @PathVariable int eventId) {
-        return ResponseEntity.ok(service.changeEventDate(eventId, date));
+    public ResponseEntity<?> changeEventDate(@RequestBody ModifyEventRequest request, @PathVariable int id) {
+        return ResponseEntity.ok(service.changeEventDate(id, request.date(), request.time()));
     }
 
 

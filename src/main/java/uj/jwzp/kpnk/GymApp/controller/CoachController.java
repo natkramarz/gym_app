@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/coaches")
+@RequestMapping("/api/v1/coaches")
 public class CoachController {
 
     private final CoachService service;
@@ -31,19 +31,19 @@ public class CoachController {
     }
 
     @GetMapping(path = "{id}")
-    public ResponseEntity<?> getCoach(@PathVariable int id) {
-        return ResponseEntity.ok(service.coach(id));
+    public Coach getCoach(@PathVariable int id) {
+        return service.coach(id);
     }
 
     @GetMapping(params = {"page", "size"})
-    public ResponseEntity<?> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
+    public Page<Coach> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        return service.findPaginated(pageNumber, pageSize);
     }
 
     @PostMapping("/template")
     public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
         Coach createdCoach = service.addCoach(request.firstName(), request.lastName(), request.yearOfBirth());
-        return ResponseEntity.created(URI.create("/api/coaches/" + createdCoach.getId())).body(createdCoach);
+        return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);
     }
 
     @PutMapping(path = "{id}")
@@ -51,11 +51,10 @@ public class CoachController {
         return ResponseEntity.ok(service.modifyCoach(id, request.firstName(), request.lastName(), request.yearOfBirth()));
     }
 
-
-
     @DeleteMapping(path = "{id}")
-    public void removeCoach(@PathVariable int id) {
+    public ResponseEntity<?> removeCoach(@PathVariable int id) {
         service.removeCoach(id);
+        return ResponseEntity.noContent().build();
     }
 
 

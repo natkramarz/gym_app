@@ -1,5 +1,6 @@
 package uj.jwzp.kpnk.GymApp.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.EventTemplateCreateRequest;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/event_templates")
+@RequestMapping("/api/v1/event_templates")
 public class EventTemplateController {
 
     private final EventTemplateService service;
@@ -28,8 +29,8 @@ public class EventTemplateController {
     }
 
     @GetMapping(params = {"page", "size"})
-    public ResponseEntity<?> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
+    public Page<EventTemplate> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        return service.findPaginated(pageNumber, pageSize);
     }
 
     @GetMapping("{id}")
@@ -39,16 +40,17 @@ public class EventTemplateController {
 
     @PostMapping
     public ResponseEntity<?> addEventTemplate(@RequestBody EventTemplateCreateRequest request) {
-        EventTemplate createdEventTemplate = service.addEventTemplate(
+        EventTemplate createdEventTemplate = service.createEventTemplate(
                 request.title(),
                 request.day(),
                 request.time(),
                 request.duration(),
                 request.clubId(),
-                request.coachId()
+                request.coachId(),
+                request.peopleLimit()
         );
 
-        return ResponseEntity.created(URI.create("/api/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
+        return ResponseEntity.created(URI.create("/api/v1/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
     }
 
     @PatchMapping(path = "{id}")
@@ -61,13 +63,14 @@ public class EventTemplateController {
                         request.time(),
                         request.duration(),
                         request.clubId(),
-                        request.coachId()
+                        request.coachId(),
+                        request.peopleLimit()
                 )
         );
     }
 
     @DeleteMapping(path = "{id}")
     public void removeEventTemplate(@PathVariable int id) {
-        service.removeEventTemplate(id);
+        service.deleteEventTemplate(id);
     }
 }

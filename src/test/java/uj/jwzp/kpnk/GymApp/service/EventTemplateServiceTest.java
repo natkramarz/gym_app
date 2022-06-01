@@ -9,9 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventTemplateDurationException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventTemplateNotFoundException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventTemplateTimeException;
+import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateDurationException;
+import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateTimeException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
@@ -55,7 +55,7 @@ public class EventTemplateServiceTest {
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
         club = new Club(0, "testClub1", "testAddress1", whenOpen);
         coach = new Coach(0, "testCoach1", "testCoach1", 2000);
-        eventTemplate = new EventTemplate(0, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1);
+        eventTemplate = new EventTemplate(0, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1, 8);
     }
 
 
@@ -78,9 +78,9 @@ public class EventTemplateServiceTest {
     public void addValidEvent() {
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
-        given(eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId())).willReturn(eventTemplate);
+        given(eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit())).willReturn(eventTemplate);
         given(eventTemplateRepository.save(eventTemplate)).willReturn(eventTemplate);
-        var serviceEvent = eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId());
+        var serviceEvent = eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit());
         Assertions.assertEquals(serviceEvent, eventTemplate);
     }
 
@@ -89,7 +89,7 @@ public class EventTemplateServiceTest {
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
         given(coachRepository.findById(3)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), 3))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), 3, eventTemplate.getPeopleLimit()))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasMessageContaining("Unknown coach id");
     }
@@ -98,7 +98,7 @@ public class EventTemplateServiceTest {
     public void addEventWithNonExistentClub() {
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(ClubNotFoundException.class)
                 .hasMessageContaining("Unknown club id");
     }
@@ -145,10 +145,10 @@ public class EventTemplateServiceTest {
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
 
-        var uut = new EventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId());
+        var uut = new EventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), 8);
         given(eventTemplateRepository.save(uut)).willReturn(uut);
 
-        var serviceEvent = eventTemplateService.modifyEventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId());
+        var serviceEvent = eventTemplateService.modifyEventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit());
         Assertions.assertEquals(serviceEvent, uut);
     }
 
@@ -157,7 +157,7 @@ public class EventTemplateServiceTest {
         given(eventTemplateRepository.findById(eventTemplate.getId())).willReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                eventTemplateService.modifyEventTemplate(eventTemplate.getId(), eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+                eventTemplateService.modifyEventTemplate(eventTemplate.getId(), eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown event id: " + eventTemplate.getId());
     }
@@ -165,11 +165,10 @@ public class EventTemplateServiceTest {
     @Test
     public void modifyEventWithNonExistentClub() {
         given(eventTemplateRepository.findById(eventTemplate.getId())).willReturn(Optional.of(eventTemplate));
-        given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                eventTemplateService.modifyEventTemplate(eventTemplate.getId(), eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+                eventTemplateService.modifyEventTemplate(eventTemplate.getId(), eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(ClubNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown club id: " + eventTemplate.getClubId());
     }
@@ -177,10 +176,10 @@ public class EventTemplateServiceTest {
     @Test
     public void modifyEventWithNonExistentCoach() {
         given(eventTemplateRepository.findById(eventTemplate.getId())).willReturn(Optional.of(eventTemplate));
-        given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.empty());
+        given(clubRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(club));
 
         assertThatThrownBy(() ->
-                eventTemplateService.modifyEventTemplate(eventTemplate.getId(), eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+                eventTemplateService.modifyEventTemplate(eventTemplate.getId(), eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + eventTemplate.getClubId());
     }
@@ -189,7 +188,7 @@ public class EventTemplateServiceTest {
     public void removeNonExistentEvent() {
         given(eventTemplateRepository.findById(1)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventTemplateService.removeEventTemplate(1))
+        assertThatThrownBy(() -> eventTemplateService.deleteEventTemplate(1))
                 .isInstanceOf(EventTemplateNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown event id: 1");
     }
@@ -199,21 +198,21 @@ public class EventTemplateServiceTest {
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), Duration.ofHours(30), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), eventTemplate.getTime(), Duration.ofHours(30), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateDurationException.class)
-                .hasFieldOrPropertyWithValue("message", "Event duration too long: " + eventTemplate.getTitle());
+                .hasMessageContaining("Event template duration is too long");
     }
 
     @Test
-    public void modifyEventToBeLongerThan24Hours() {
+    public void modifyEventTemplateToBeLongerThan24Hours() {
         given(eventTemplateRepository.findById(eventTemplate.getId())).willReturn(Optional.of(eventTemplate));
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
-        var uut = new EventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId());
+        var uut = new EventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration(), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit());
 
-        assertThatThrownBy(() -> eventTemplateService.modifyEventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), Duration.ofHours(30), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.modifyEventTemplate(0, "modified", eventTemplate.getDay(), eventTemplate.getTime(), Duration.ofHours(30), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateDurationException.class)
-                .hasMessageContaining("Event duration too long");
+                .hasMessageContaining("duration is too long");
     }
 
     @Test
@@ -221,9 +220,9 @@ public class EventTemplateServiceTest {
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), LocalTime.of(6,0), Duration.ofHours(1), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), LocalTime.of(6,0), Duration.ofHours(1), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
+                .hasMessageContaining("Event template not within opening hours");
     }
 
     @Test
@@ -231,18 +230,18 @@ public class EventTemplateServiceTest {
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), LocalTime.of(23,0), Duration.ofMinutes(30), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), eventTemplate.getDay(), LocalTime.of(23,0), Duration.ofMinutes(30), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
+                .hasMessageContaining("Event template not within opening hours");
     }
 
     @Test
     public void addEvent_ClubOpen24per7() {
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
-        var event = new EventTemplate(0, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), EventTemplateServiceTest.eventTemplate.getClubId(), EventTemplateServiceTest.eventTemplate.getCoachId());
+        var event = new EventTemplate(0, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), EventTemplateServiceTest.eventTemplate.getClubId(), EventTemplateServiceTest.eventTemplate.getCoachId(), EventTemplateServiceTest.eventTemplate.getPeopleLimit());
         given(eventTemplateRepository.save(event)).willReturn(event);
-        var serviceEvent = eventTemplateService.addEventTemplate(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
+        var serviceEvent = eventTemplateService.createEventTemplate(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId(), eventTemplate.getPeopleLimit());
         Assertions.assertEquals(serviceEvent, event);
     }
 
@@ -251,9 +250,9 @@ public class EventTemplateServiceTest {
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), DayOfWeek.MONDAY, LocalTime.of(20,0), Duration.ofHours(5), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), DayOfWeek.MONDAY, LocalTime.of(20,0), Duration.ofHours(5), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
+                .hasMessageContaining("Event template not within opening hours");
     }
 
     @Test
@@ -261,9 +260,9 @@ public class EventTemplateServiceTest {
         given(coachRepository.findById(eventTemplate.getCoachId())).willReturn(Optional.of(coach));
         given(clubRepository.findById(eventTemplate.getClubId())).willReturn(Optional.of(club));
 
-        assertThatThrownBy(() -> eventTemplateService.addEventTemplate(eventTemplate.getTitle(), DayOfWeek.MONDAY, LocalTime.of(6,0), Duration.ofHours(5), eventTemplate.getClubId(), eventTemplate.getCoachId()))
+        assertThatThrownBy(() -> eventTemplateService.createEventTemplate(eventTemplate.getTitle(), DayOfWeek.MONDAY, LocalTime.of(6,0), Duration.ofHours(5), eventTemplate.getClubId(), eventTemplate.getCoachId(), eventTemplate.getPeopleLimit()))
                 .isInstanceOf(EventTemplateTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
+                .hasMessageContaining("Event template not within opening hours of club");
     }
 
 

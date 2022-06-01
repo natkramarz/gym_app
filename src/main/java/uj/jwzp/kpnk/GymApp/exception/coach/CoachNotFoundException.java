@@ -6,7 +6,6 @@ import uj.jwzp.kpnk.GymApp.exception.GymAppException;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class CoachNotFoundException extends GymAppException {
-
     public CoachNotFoundException(int id) {
         super("Unknown coach id: " + id);
     }

@@ -10,4 +10,5 @@ import java.util.*;
 public interface EventTemplateRepository extends JpaRepository<EventTemplate, Integer> {
     List<EventTemplate> findByCoachId(Integer id);
     List<EventTemplate> findByClubId(Integer id);
+    List<EventTemplate> deleteAllByCoachId(Integer id);
 }

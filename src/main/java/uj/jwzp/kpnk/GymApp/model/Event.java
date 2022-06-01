@@ -14,13 +14,18 @@ public class Event extends EventTemplate {
     @Column(columnDefinition = "DATE")
     LocalDate eventDate;
 
-    public Event(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, LocalDate eventDate) {
-        super(id, title, day, time, duration, clubId, coachId);
+    public Event(int id, String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, LocalDate eventDate, int peopleLimit) {
+        super(id, title, eventDate.getDayOfWeek(), startTime, duration, clubId, coachId, peopleLimit);
         this.eventDate = eventDate;
     }
 
-    public Event(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, LocalDate eventDate) {
-        super(title, day, time, duration, clubId, coachId);
+    public Event(String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, LocalDate eventDate, int peopleLimit) {
+        super(title, day, startTime, duration, clubId, coachId, peopleLimit);
+        this.eventDate = eventDate;
+    }
+
+    public Event(int id, String title, LocalDate eventDate, Duration duration, LocalTime startTime, int clubId, int coachId, int peopleLimit) {
+        super(id, title, eventDate.getDayOfWeek(), startTime, duration, clubId, coachId, peopleLimit);
         this.eventDate = eventDate;
     }
 
@@ -34,13 +39,19 @@ public class Event extends EventTemplate {
 
     public void setEventDate(LocalDate eventDate) {
         this.eventDate = eventDate;
+        this.setDay(eventDate.getDayOfWeek());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        Event that = (Event) o;
+        if (!(Objects.equals(this.getTitle(), that.getTitle()) &&
+                Objects.equals(this.getTime(), that.getTime()) &&
+                Objects.equals(this.getDuration(), that.getDuration()) &&
+                this.getClubId() == that.getClubId() &&
+                this.getCoachId() == that.getCoachId())) return false;
         Event event = (Event) o;
         return eventDate.equals(event.eventDate);
     }
@@ -53,8 +64,11 @@ public class Event extends EventTemplate {
     @Override
     public String toString() {
         return "Event{" +
-                "eventDate=" + eventDate + "title=" + this.getTitle() + ", " +
+                "eventDate=" + eventDate +
+                "title=" + this.getTitle() + ", " +
+                "eventDay=" + this.getDay() + ", " +
                 "duration=" + this.getDuration() + ", " +
+                "startTime=" + this.getTime() + ", " +
                 "clubId=" + this.getClubId() + ", " +
                 "coachId=" + this.getCoachId() +
                 '}';

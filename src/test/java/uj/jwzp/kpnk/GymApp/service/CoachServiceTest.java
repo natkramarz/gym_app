@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
+import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
@@ -28,7 +29,7 @@ public class CoachServiceTest {
     @Mock
     private CoachRepository coachRepository;
     @Mock
-    private EventTemplateService eventTemplateService;
+    private EventService eventService;
     @InjectMocks
     private CoachService coachService;
 
@@ -72,7 +73,7 @@ public class CoachServiceTest {
     }
 
     @Test
-    public void modifyNonExistentClub() {
+    public void modifyNonExistentCoach() {
         given(coachRepository.findById(2)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> coachService.modifyCoach(2, "test", "test", 2000))
@@ -92,7 +93,7 @@ public class CoachServiceTest {
     @Test
     public void removeCoachWithAssignedEvents() {
         given(coachRepository.findById(1)).willReturn(Optional.of(coach));
-        given(eventTemplateService.eventTemplatesByCoach(1)).willReturn(List.of(new EventTemplate()));
+        given(eventService.eventsByCoach(1)).willReturn(List.of(new Event()));
 
         assertThatThrownBy(() -> coachService.removeCoach(1))
                 .isInstanceOf(AssignedEventsException.class)

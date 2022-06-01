@@ -37,16 +37,17 @@ public class EventTemplate {
 
     }
 
-    public EventTemplate(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
+    public EventTemplate(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
         this.title = title;
         this.day = day;
         this.time = time;
         this.duration = duration;
         this.clubId = clubId;
         this.coachId = coachId;
+        this.peopleLimit = peopleLimit;
     }
 
-    public EventTemplate(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId) {
+    public EventTemplate(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
         this.id = id;
         this.title = title;
         this.day = day;
@@ -54,6 +55,7 @@ public class EventTemplate {
         this.duration = duration;
         this.clubId = clubId;
         this.coachId = coachId;
+        this.peopleLimit = peopleLimit;
     }
 
     public int getId() {
