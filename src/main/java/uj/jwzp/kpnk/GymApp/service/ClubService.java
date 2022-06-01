@@ -10,7 +10,6 @@ import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
@@ -49,7 +48,7 @@ public class ClubService {
     private void deleteEventTemplatesByClub(Club club) {
         List<EventTemplate> eventTemplates = eventTemplateService.eventTemplatesByClub(club.getId());
         List<Integer> idsOfEventTemplatesToDelete = eventTemplates.stream()
-                .filter(eventTemplate -> !eventTemplateService.isEventTemplateBetweenOpeningHours(club.getWhenOpen(), eventTemplate.getDay(), eventTemplate.getTime(), eventTemplate.getDuration()))
+                .filter(eventTemplate -> !eventTemplateService.isEventTemplateBetweenOpeningHours(club.getWhenOpen(), eventTemplate.getDay(), eventTemplate.getStartTime(), eventTemplate.getDuration()))
                 .map(EventTemplate::getId)
                 .collect(Collectors.toList());
         eventTemplateService.deleteEventTemplatesByClub(idsOfEventTemplatesToDelete);
@@ -61,7 +60,7 @@ public class ClubService {
 
         eventService.eventsByClub(id)
             .forEach(event -> {
-                if (!eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration())) {
+                if (!eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getStartTime(), event.getDuration())) {
                     throw new ClubOpeningHoursException(id);
                 }
             });

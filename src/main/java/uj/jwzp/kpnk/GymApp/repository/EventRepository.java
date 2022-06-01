@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer> {
-    public List<Event> findByCoachId(Integer id);
-    public List<Event> findByClubId(Integer id);
-    public List<Event> findByClubIdAndEventDate(Integer id, LocalDate eventDate);
+    List<Event> findByCoachId(Integer id);
+    List<Event> findByClubId(Integer id);
+    List<Event> findByClubIdAndEventDate(Integer id, LocalDate eventDate);
+    List<Event> findByCoachIdAndEventDate(Integer coachId, LocalDate eventDate);
 }

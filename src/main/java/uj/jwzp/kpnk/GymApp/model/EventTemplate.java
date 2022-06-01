@@ -23,7 +23,7 @@ public class EventTemplate {
     private DayOfWeek day;
 
     @Column(columnDefinition = "TIME")
-    private LocalTime time;
+    private LocalTime startTime;
 
     private Duration duration;
 
@@ -37,21 +37,21 @@ public class EventTemplate {
 
     }
 
-    public EventTemplate(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
+    public EventTemplate(String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, int peopleLimit) {
         this.title = title;
         this.day = day;
-        this.time = time;
+        this.startTime = startTime;
         this.duration = duration;
         this.clubId = clubId;
         this.coachId = coachId;
         this.peopleLimit = peopleLimit;
     }
 
-    public EventTemplate(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
+    public EventTemplate(int id, String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, int peopleLimit) {
         this.id = id;
         this.title = title;
         this.day = day;
-        this.time = time;
+        this.startTime = startTime;
         this.duration = duration;
         this.clubId = clubId;
         this.coachId = coachId;
@@ -70,8 +70,8 @@ public class EventTemplate {
         return day;
     }
 
-    public LocalTime getTime() {
-        return time;
+    public LocalTime getStartTime() {
+        return startTime;
     }
 
     public Duration getDuration() {
@@ -94,7 +94,7 @@ public class EventTemplate {
         return this.id == that.id &&
                 Objects.equals(this.title, that.title) &&
                 Objects.equals(this.day, that.day) &&
-                Objects.equals(this.time, that.time) &&
+                Objects.equals(this.startTime, that.startTime) &&
                 Objects.equals(this.duration, that.duration) &&
                 this.clubId == that.clubId &&
                 this.coachId == that.coachId;
@@ -102,7 +102,7 @@ public class EventTemplate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, day, time, duration, clubId, coachId);
+        return Objects.hash(id, title, day, startTime, duration, clubId, coachId);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class EventTemplate {
                 "id=" + id + ", " +
                 "title=" + title + ", " +
                 "day=" + day + ", " +
-                "time=" + time + ", " +
+                "time=" + startTime + ", " +
                 "duration=" + duration + ", " +
                 "clubId=" + clubId + ", " +
                 "coachId=" + coachId + ']';
@@ -129,8 +129,8 @@ public class EventTemplate {
         this.day = day;
     }
 
-    public void setTime(LocalTime time) {
-        this.time = time;
+    public void setStartTime(LocalTime time) {
+        this.startTime = time;
     }
 
     public void setDuration(Duration duration) {

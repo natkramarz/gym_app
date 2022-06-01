@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventPastDateException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventTimeException;
@@ -23,6 +24,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -134,5 +136,17 @@ class EventServiceTest {
         var result = eventService.changeEventDate(0, LocalDate.of(2022, 7, 5), LocalTime.of(15, 0));
 
         assertEquals(modifiedEvent, result);
+    }
+
+    @Test
+    void addEventWithCoachAlreadyBooked() {
+        Event event = new Event(0, "event testowy", LocalDate.of(2022, 7, 1), Duration.ofHours(2), LocalTime.of(12, 0), 0, 0, 8);
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(0)).willReturn(Optional.of(coach));
+        given(repository.findByCoachIdAndEventDate(0, LocalDate.of(2022, 7, 1))).willReturn(List.of(event));
+
+        assertThatThrownBy(() -> eventService.createEvent("event z zarezerwowanym trenerem", LocalTime.of(13, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8))
+                .isInstanceOf(CoachAlreadyBookedException.class)
+                .hasMessageContaining("is already booked during event hours");
     }
 }

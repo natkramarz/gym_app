@@ -138,7 +138,7 @@ public class ClubServiceTest {
         newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));
         newOpeningHours.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(13, 0), LocalTime.of(22, 0)));
 
-        given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getTime(), event.getDuration())).willReturn(false);
+        given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getStartTime(), event.getDuration())).willReturn(false);
 
         assertThatThrownBy(() -> clubService.modifyClub(1, club.getName(), club.getAddress(), newOpeningHours))
                 .isInstanceOf(ClubOpeningHoursException.class)

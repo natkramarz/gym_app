@@ -1,6 +1,5 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import net.minidev.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,11 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.*;
-import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateDurationException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundException;
-import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateTimeException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.*;
@@ -58,6 +56,20 @@ public class EventService {
         return false;
     }
 
+    private boolean isCoachBooked(int coachId, LocalDate date, LocalTime startTime, Duration duration) {
+        var endTime = startTime.plus(duration);
+        return repository.findByCoachIdAndEventDate(coachId, date).stream()
+                .anyMatch(event ->  {
+                    var start = event.getStartTime();
+                    var end = event.getStartTime().plus(event.getDuration());
+                    if ((start.isAfter(startTime) && start.isBefore(endTime)) ||
+                            (end.isAfter(startTime) && end.isBefore(endTime))) {
+                        return true;
+                    }
+                    return false;
+                });
+    }
+
     private boolean areEventDetailsValid(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, LocalDate eventDate, int peopleLimit) {
         Optional<Club> clubOptional = clubRepository.findById(clubId);
         if (title == null || title.length() == 0) throw new EventTitleFormatException(title);
@@ -68,6 +80,7 @@ public class EventService {
         if (peopleLimit < 0) throw new PeopleLimitFormatException(peopleLimit);
         if (eventDate.isBefore(LocalDate.now())) throw new EventPastDateException(eventDate);
         if (duration.compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException();
+        if (isCoachBooked(coachId, eventDate, time, duration)) throw new CoachAlreadyBookedException(coachId);
         if (!isEventBetweenOpeningHours(club.getWhenOpen(), day, time, duration)) throw new EventTimeException(clubId);
 
         return true;
@@ -76,6 +89,7 @@ public class EventService {
 
     public Event createEvent(String title, LocalTime time, Duration duration, int clubId, int coachId, LocalDate eventDate, int peopleLimit) {
         if (!areEventDetailsValid(title, eventDate.getDayOfWeek(), time, duration, clubId, coachId, eventDate, peopleLimit)) return null;
+
         Event event = new Event(title, eventDate.getDayOfWeek(), time, duration, clubId, coachId, eventDate, peopleLimit);
         return repository.save(event);
 
@@ -85,10 +99,11 @@ public class EventService {
         EventTemplate template = eventTemplateRepository.findById(templateId).orElseThrow(() -> new EventTemplateNotFoundException(templateId));
         if (eventDate.isBefore(LocalDate.now())) throw new EventPastDateException(eventDate);
         if (template.getDay() != eventDate.getDayOfWeek()) throw new EventTemplateDayOfWeekMismatchException(template.getDay(), eventDate.getDayOfWeek());
+        if (isCoachBooked(template.getCoachId(), eventDate, template.getStartTime(), template.getDuration())) throw new CoachAlreadyBookedException(template.getCoachId());
         Event event = new Event(
                 template.getTitle(),
                 template.getDay(),
-                template.getTime(),
+                template.getStartTime(),
                 template.getDuration(),
                 template.getClubId(),
                 template.getCoachId(),
@@ -150,7 +165,7 @@ public class EventService {
         Club club = clubRepository.findById(event.getClubId()).orElseThrow(() -> new ClubNotFoundException(event.getClubId()));
         if (!isEventBetweenOpeningHours(club.getWhenOpen(), date.getDayOfWeek(), time, event.getDuration())) throw new EventTimeException(event.getClubId());
         event.setEventDate(date);
-        event.setTime(time);
+        event.setStartTime(time);
         return repository.save(event);
     }
 

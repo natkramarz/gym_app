@@ -27,12 +27,12 @@ public class DurationDeserializer extends com.fasterxml.jackson.datatype.jsr310.
         }
         if (duration.length != 2) throw new EventDurationParsingException();
         Duration result = null;
-        System.out.println("here");
         try {
             result = Duration.parse("PT" + duration[0] + "H" + duration[1] + "M");
         } catch (DateTimeParseException e){
             throw new EventDurationParsingException();
         }
+
         return result;
     }
 }

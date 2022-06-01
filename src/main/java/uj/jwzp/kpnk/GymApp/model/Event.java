@@ -48,7 +48,7 @@ public class Event extends EventTemplate {
         if (o == null || getClass() != o.getClass()) return false;
         Event that = (Event) o;
         if (!(Objects.equals(this.getTitle(), that.getTitle()) &&
-                Objects.equals(this.getTime(), that.getTime()) &&
+                Objects.equals(this.getStartTime(), that.getStartTime()) &&
                 Objects.equals(this.getDuration(), that.getDuration()) &&
                 this.getClubId() == that.getClubId() &&
                 this.getCoachId() == that.getCoachId())) return false;
@@ -68,7 +68,7 @@ public class Event extends EventTemplate {
                 "title=" + this.getTitle() + ", " +
                 "eventDay=" + this.getDay() + ", " +
                 "duration=" + this.getDuration() + ", " +
-                "startTime=" + this.getTime() + ", " +
+                "startTime=" + this.getStartTime() + ", " +
                 "clubId=" + this.getClubId() + ", " +
                 "coachId=" + this.getCoachId() +
                 '}';
