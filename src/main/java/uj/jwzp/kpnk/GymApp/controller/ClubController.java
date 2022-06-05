@@ -1,5 +1,7 @@
 package uj.jwzp.kpnk.GymApp.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
@@ -19,6 +21,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/api/v1/clubs")
 public class ClubController {
+
+    Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     private final ClubService service;
     private final ClubRepresentationAssembler clubRepresentationAssembler;
@@ -54,7 +58,9 @@ public class ClubController {
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
-        return ResponseEntity.ok(service.modifyClub(id, request.name(), request.address(), request.whenOpen()));
+        var modifiedClub = service.modifyClub(id, request.name(), request.address(), request.whenOpen());
+        logger.info("Created club: {}", modifiedClub);
+        return ResponseEntity.ok(modifiedClub);
     }
 
     @DeleteMapping(path = "{id}")
