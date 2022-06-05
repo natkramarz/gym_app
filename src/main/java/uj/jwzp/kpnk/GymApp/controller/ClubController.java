@@ -3,6 +3,7 @@ package uj.jwzp.kpnk.GymApp.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +14,12 @@ import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.service.ClubService;
 
 import java.net.URI;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/api/clubs")
+@RequestMapping("/api/v1/clubs")
 public class ClubController {
 
     Logger logger = LoggerFactory.getLogger("jsonLogger");
@@ -34,33 +34,29 @@ public class ClubController {
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<ClubRepresentation>> allClubs() {
-        return ResponseEntity.ok(clubRepresentationAssembler.toCollectionModel(service.allClubs().stream().toList()));
+    public CollectionModel<ClubRepresentation> allClubs() {
+        return clubRepresentationAssembler.toCollectionModel(service.allClubs().stream().toList());
     }
 
     @GetMapping(path = "{id}")
-    public ResponseEntity<?> getClub(@PathVariable int id) {
+    public ClubRepresentation getClub(@PathVariable int id) {
         Club club = service.club(id);
-        ClubRepresentation clubRepresentation = clubRepresentationAssembler.toModel(club)
+        return clubRepresentationAssembler.toModel(club)
                 .add(linkTo(methodOn(ClubController.class).allClubs()).withRel("clubs"));
-        return ResponseEntity.ok(
-                clubRepresentation
-        );
     }
 
     @GetMapping(params = {"page", "size"})
-    public ResponseEntity<?> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
+    public Page<Club> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
+        return service.findPaginated(pageNumber, pageSize);
     }
 
     @PostMapping
     public ResponseEntity<?> addClub(@RequestBody ClubCreateRequest request) {
         var createdClub = service.addClub(request.name(), request.address(), request.whenOpen());
-        logger.info("Created club: {}", createdClub);
-        return ResponseEntity.created(URI.create("/api/clubs" + createdClub.getId())).body(createdClub);
+        return ResponseEntity.created(URI.create("/api/v1/clubs" + createdClub.getId())).body(createdClub);
     }
 
-    @PatchMapping(path = "{id}")
+    @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
         var modifiedClub = service.modifyClub(id, request.name(), request.address(), request.whenOpen());
         logger.info("Created club: {}", modifiedClub);
@@ -68,7 +64,8 @@ public class ClubController {
     }
 
     @DeleteMapping(path = "{id}")
-    public void removeClub(@PathVariable int id) {
-        service.removeClub(id);
+    public ResponseEntity<?> removeClub(@PathVariable int id) {
+        service.deleteClub(id);
+        return ResponseEntity.noContent().build();
     }
 }

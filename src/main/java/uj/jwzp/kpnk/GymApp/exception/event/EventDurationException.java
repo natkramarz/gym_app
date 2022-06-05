@@ -4,10 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import uj.jwzp.kpnk.GymApp.exception.GymAppException;
 
-@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class EventDurationException extends GymAppException {
-
-    public EventDurationException(String eventTitle) {
-        super("Event duration too long: " + eventTitle);
+    public EventDurationException() {
+        super("Event duration cannot be longer than 24 hours");
     }
 }

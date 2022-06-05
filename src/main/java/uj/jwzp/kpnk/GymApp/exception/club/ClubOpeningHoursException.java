@@ -6,7 +6,6 @@ import uj.jwzp.kpnk.GymApp.exception.GymAppException;
 
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class ClubOpeningHoursException extends GymAppException {
-
     public ClubOpeningHoursException(int id) {
         super("There are standing out events in club: " + id);
     }

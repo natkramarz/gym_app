@@ -5,15 +5,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record EventCreateRequest (
+public record EventTemplateCreateRequest(
         String title,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy") LocalDate eventDate,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm") LocalTime startTime,
+        DayOfWeek day,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm") LocalTime time,
         @JsonDeserialize(using = EventDurationDeserializer.class) Duration duration,
         int clubId,
         int coachId,
-        int peopleLimit){
+        int peopleLimit
+    ) {
+
 }

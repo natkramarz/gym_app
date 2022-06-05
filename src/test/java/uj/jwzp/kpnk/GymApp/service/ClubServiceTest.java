@@ -6,18 +6,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
-import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Event;
-import uj.jwzp.kpnk.GymApp.model.OpeningHours;
+import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -29,16 +29,20 @@ import static org.mockito.BDDMockito.given;
 public class ClubServiceTest {
 
     private static Club club;
+    private static Coach coach;
+    private static Map<DayOfWeek, OpeningHours> whenOpen;
+    private static Event event;
+
     @Mock
     private ClubRepository clubRepository;
     @Mock
     private EventService eventService;
     @Mock
+    private EventTemplateService eventTemplateService;
+    @Mock
     private CoachRepository coachRepository;
     @InjectMocks
     private ClubService clubService;
-    private static Map<DayOfWeek, OpeningHours> whenOpen;
-    private static Event event;
 
     @BeforeAll
     static void setUp() {
@@ -48,7 +52,8 @@ public class ClubServiceTest {
         whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
-        club = new Club(1, "testClub1", "testAddress1", whenOpen);
+        club = new Club(0, "testClub1", "testAddress1", whenOpen);
+        coach = new Coach(1,"Kate", "Test", 2000);
         event = new Event(
                 1,
                 "testEvent1",
@@ -56,7 +61,9 @@ public class ClubServiceTest {
                 LocalTime.of(8,0),
                 Duration.ofHours(2),
                 1,
-                1
+                1,
+                LocalDate.now(),
+                8
         );
     }
 
@@ -75,21 +82,20 @@ public class ClubServiceTest {
 
     @Test
     public void addValidClub() {
-        var clubWithIdZero = new Club(0, "testClub", "testAddress", whenOpen);
-        given(clubRepository.save(clubWithIdZero)).willReturn(clubWithIdZero);
-        var serviceClub = clubService.addClub(clubWithIdZero.getName(), clubWithIdZero.getAddress(), clubWithIdZero.getWhenOpen());
-        Assertions.assertEquals(serviceClub, clubWithIdZero);
+        given(clubRepository.save(club)).willReturn(club);
+        var newClub = clubService.addClub(club.getName(), club.getAddress(), club.getWhenOpen());
+        Assertions.assertEquals(newClub, club);
     }
 
     @Test
     public void modifyValidClub() {
-        given(clubRepository.findById(1)).willReturn(Optional.of(club));
-        given(eventService.eventsByClub(1)).willReturn(List.of(event));
-        given(eventService.isEventBetweenOpeningHours(whenOpen, event.getDay(), event.getTime(), event.getDuration())).willReturn(true);
-        var uut = new Club(1, "modified1", "modified2", club.getWhenOpen());
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(eventService.eventsByClub(0)).willReturn(List.of(event));
+        var uut = new Club(0, "modified1", "modified2", club.getWhenOpen());
         given(clubRepository.save(uut)).willReturn(uut);
-
-        var serviceClub = clubService.modifyClub(1, "modified1", "modified2", club.getWhenOpen());
+        given(eventService.eventsByClub(0)).willReturn(List.of());
+        Mockito.doNothing().when(eventTemplateService).deleteEventTemplatesByClub(List.of());
+        var serviceClub = clubService.modifyClub(0, "modified1", "modified2", club.getWhenOpen());
 
         Assertions.assertEquals(serviceClub, uut);
     }
@@ -104,20 +110,20 @@ public class ClubServiceTest {
     }
 
     @Test
-    public void removeNonExistentClub() {
+    public void deleteNonExistentClub() {
         given(clubRepository.findById(1)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> clubService.removeClub(1))
+        assertThatThrownBy(() -> clubService.deleteClub(1))
                 .isInstanceOf(ClubNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown club id: 1");
     }
 
     @Test
-    public void removeClubWithEvents() {
+    public void deleteClubWithEvents() {
         given(clubRepository.findById(1)).willReturn(Optional.of(club));
         given(eventService.eventsByClub(1)).willReturn(List.of(new Event()));
 
-        assertThatThrownBy(() -> clubService.removeClub(1))
+        assertThatThrownBy(() -> clubService.deleteClub(1))
                 .isInstanceOf(ClubHasEventException.class)
                 .hasFieldOrPropertyWithValue("message", "There are events in club: 1");
     }
@@ -132,9 +138,9 @@ public class ClubServiceTest {
         newOpeningHours.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(10, 0), LocalTime.of(22, 0)));
         newOpeningHours.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(13, 0), LocalTime.of(22, 0)));
 
-        given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getTime(), event.getDuration())).willReturn(false);
+        given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getStartTime(), event.getDuration())).willReturn(false);
 
-        assertThatThrownBy(() -> clubService.modifyClub(club.getId(), club.getName(), club.getAddress(), newOpeningHours))
+        assertThatThrownBy(() -> clubService.modifyClub(1, club.getName(), club.getAddress(), newOpeningHours))
                 .isInstanceOf(ClubOpeningHoursException.class)
                 .hasMessageContaining("standing out events");
     }

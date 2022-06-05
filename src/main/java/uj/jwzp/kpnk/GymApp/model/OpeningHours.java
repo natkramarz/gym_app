@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Embeddable
+@Table(name="opening_hours")
 public class OpeningHours {
 
     @Column(name = "valueFrom", columnDefinition = "TIME")

@@ -12,5 +12,4 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public interface CoachRepository extends JpaRepository<Coach, Integer> {
-
 }

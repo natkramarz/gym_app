@@ -1,17 +1,16 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventDurationException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.event.EventPastDateException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventTimeException;
+import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
@@ -22,32 +21,40 @@ import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EventServiceTest {
+class EventServiceTest {
 
-
-    private static Event event;
     private static Club club;
     private static Coach coach;
+    private static Map<DayOfWeek, OpeningHours> whenOpen;
+
+
     @Mock
-    private EventRepository eventRepository;
-    @Mock
-    private CoachRepository coachRepository;
+    private EventRepository repository;
+
     @Mock
     private ClubRepository clubRepository;
+
+    @Mock
+    private CoachRepository coachRepository;
+
     @InjectMocks
     private EventService eventService;
 
     @BeforeAll
-    static void setUp() {
-        Map<DayOfWeek, OpeningHours> whenOpen = new HashMap<>();
+    static void setup() {
+        whenOpen = new HashMap<>();
         whenOpen.put(DayOfWeek.MONDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
         whenOpen.put(DayOfWeek.TUESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(22, 0)));
         whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.MAX));
@@ -55,216 +62,91 @@ public class EventServiceTest {
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
         club = new Club(0, "testClub1", "testAddress1", whenOpen);
         coach = new Coach(0, "testCoach1", "testCoach1", 2000);
-        event = new Event(0, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1);
-    }
-
-
-    @Test
-    public void getAllEventsWithOneClub() {
-        given(eventRepository.findAll()).willReturn(List.of(event));
-        var events = eventService.allEvents();
-
-        assertThat(events).containsExactly(event);
     }
 
     @Test
-    public void getAllEventsEmpty() {
-        given(eventRepository.findAll()).willReturn(List.of());
+    void createValidEvent() {
+        Event event = new Event(0, "event testowy", DayOfWeek.MONDAY, LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8);
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(0)).willReturn(Optional.of(coach));
+        given(repository.save(event)).willReturn(event);
 
-        Assertions.assertTrue(eventService.allEvents().isEmpty());
+        var newEvent = eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8);
+        assertEquals(event, newEvent);
     }
 
     @Test
-    public void addValidEvent() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId())).willReturn(event);
-        given(eventRepository.save(event)).willReturn(event);
-        var serviceEvent = eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
-        Assertions.assertEquals(serviceEvent, event);
-    }
+    void createEvent_NonExistingCoach() {
+        Event event = new Event(0, "event testowy", DayOfWeek.MONDAY, LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8);
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(2)).willReturn(Optional.empty());
 
-    @Test
-    public void addEventWithNonExistentCoach() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-        given(coachRepository.findById(3)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), 3))
+        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 2, LocalDate.of(2022, 6, 1), 8))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasMessageContaining("Unknown coach id");
     }
 
     @Test
-    public void addEventWithNonExistentClub() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.empty());
+    void createEvent_InvalidPeopleLimit() {
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(0)).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(ClubNotFoundException.class)
-                .hasMessageContaining("Unknown club id");
+        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), -5))
+                .isInstanceOf(PeopleLimitFormatException.class)
+                .hasMessageContaining("People limit is negative");
     }
 
     @Test
-    public void eventsByValidClub() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-        given(eventRepository.findByClubId(event.getClubId())).willReturn(List.of(event));
+    void createEvent_eventDateInPast() {
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(0)).willReturn(Optional.of(coach));
 
-        var events = eventService.eventsByClub(event.getClubId());
-        assertThat(events).containsExactly(event);
+        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 5, 1), 5))
+                .isInstanceOf(EventPastDateException.class)
+                .hasMessageContaining("new event is in the past");
     }
 
     @Test
-    public void eventsByNonExistentClub() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.empty());
+    void createEvent_eventOutsideClubOpeningHours() {
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(0)).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventService.eventsByClub(event.getClubId()))
-                .isInstanceOf(ClubNotFoundException.class)
-                .hasMessageContaining("Unknown club id: " + event.getClubId());
-    }
-
-    @Test
-    public void eventsByValidCoach() {
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(eventRepository.findByCoachId(event.getCoachId())).willReturn(List.of(event));
-
-        var events = eventService.eventsByCoach(event.getCoachId());
-        assertThat(events).containsExactly(event);
-    }
-
-    @Test
-    public void eventsByNonExistentCoach() {
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> eventService.eventsByCoach(event.getCoachId()))
-                .isInstanceOf(CoachNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + event.getCoachId());
-    }
-
-    @Test
-    public void modifyValidEvent() {
-        given(eventRepository.findById(event.getId())).willReturn(Optional.of(event));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-
-        var uut = new Event(0, "modified", event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
-        given(eventRepository.save(uut)).willReturn(uut);
-
-        var serviceEvent = eventService.modifyEvent(0, "modified", event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
-        Assertions.assertEquals(serviceEvent, uut);
-    }
-
-    @Test
-    public void modifyNonExistentEvent() {
-        given(eventRepository.findById(event.getId())).willReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-                eventService.modifyEvent(event.getId(), event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(EventNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown event id: " + event.getId());
-    }
-
-    @Test
-    public void modifyEventWithNonExistentClub() {
-        given(eventRepository.findById(event.getId())).willReturn(Optional.of(event));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-                eventService.modifyEvent(event.getId(), event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(ClubNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown club id: " + event.getClubId());
-    }
-
-    @Test
-    public void modifyEventWithNonExistentCoach() {
-        given(eventRepository.findById(event.getId())).willReturn(Optional.of(event));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-                eventService.modifyEvent(event.getId(), event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(CoachNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown coach id: " + event.getClubId());
-    }
-
-    @Test
-    public void removeNonExistentEvent() {
-        given(eventRepository.findById(1)).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> eventService.removeEvent(1))
-                .isInstanceOf(EventNotFoundException.class)
-                .hasFieldOrPropertyWithValue("message", "Unknown event id: 1");
-    }
-
-    @Test
-    public void addEventLongerThan24Hours() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), Duration.ofHours(30), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(EventDurationException.class)
-                .hasFieldOrPropertyWithValue("message", "Event duration too long: " + event.getTitle());
-    }
-
-    @Test
-    public void modifyEventToBeLongerThan24Hours() {
-        given(eventRepository.findById(event.getId())).willReturn(Optional.of(event));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-        var uut = new Event(0, "modified", event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
-
-        assertThatThrownBy(() -> eventService.modifyEvent(0, "modified", event.getDay(), event.getTime(), Duration.ofHours(30), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(EventDurationException.class)
-                .hasMessageContaining("Event duration too long");
-    }
-
-    @Test
-    public void addEventBeforeClubOpeningHour() {
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), LocalTime.of(6,0), Duration.ofHours(1), event.getClubId(), event.getCoachId()))
+        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(22, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 5))
                 .isInstanceOf(EventTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
+                .hasMessageContaining("not within opening hours of club");
     }
 
     @Test
-    public void addEventAfterClubClosingHour() {
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
+    void changeEventDate() {
+        Event event = new Event(0, "event testowy", DayOfWeek.MONDAY, LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8);
+        given(repository.findById(0)).willReturn(Optional.of(event));
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        Event modifiedEvent = new Event(
+                0,
+                "event testowy",
+                LocalDate.of(2022, 7, 5).getDayOfWeek(),
+                LocalTime.of(15, 0),
+                Duration.ofHours(2),
+                0,
+                0,
+                LocalDate.of(2022, 7, 5),
+                8);
+        given(repository.save(modifiedEvent)).willReturn(modifiedEvent);
+        var result = eventService.changeEventDate(0, LocalDate.of(2022, 7, 5), LocalTime.of(15, 0));
 
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), event.getDay(), LocalTime.of(23,0), Duration.ofMinutes(30), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(EventTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
+        assertEquals(modifiedEvent, result);
     }
 
     @Test
-    public void addEvent_ClubOpen24per7() {
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        var event = new Event(0, "testEvent1", DayOfWeek.WEDNESDAY, LocalTime.of(22,0), Duration.ofHours(4), EventServiceTest.event.getClubId(), EventServiceTest.event.getCoachId());
-        given(eventRepository.save(event)).willReturn(event);
-        var serviceEvent = eventService.addEvent(event.getTitle(), event.getDay(), event.getTime(), event.getDuration(), event.getClubId(), event.getCoachId());
-        Assertions.assertEquals(serviceEvent, event);
+    void addEventWithCoachAlreadyBooked() {
+        Event event = new Event(0, "event testowy", LocalDate.of(2022, 7, 1), Duration.ofHours(2), LocalTime.of(12, 0), 0, 0, 8);
+        given(clubRepository.findById(0)).willReturn(Optional.of(club));
+        given(coachRepository.findById(0)).willReturn(Optional.of(coach));
+        given(repository.findByCoachIdAndEventDate(0, LocalDate.of(2022, 7, 1))).willReturn(List.of(event));
+
+        assertThatThrownBy(() -> eventService.createEvent("event z zarezerwowanym trenerem", LocalTime.of(13, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8))
+                .isInstanceOf(CoachAlreadyBookedException.class)
+                .hasMessageContaining("is already booked during event hours");
     }
-
-    @Test
-    public void addEvent_EventStartingDuringOpeningHours_AndEndingWhenClubIsClosed() {
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), DayOfWeek.MONDAY, LocalTime.of(20,0), Duration.ofHours(5), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(EventTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
-    }
-
-    @Test
-    public void addEvent_EventStartingBeforeOpeningHours_AndEndingWhenClubIsOpen() {
-        given(coachRepository.findById(event.getCoachId())).willReturn(Optional.of(coach));
-        given(clubRepository.findById(event.getClubId())).willReturn(Optional.of(club));
-
-        assertThatThrownBy(() -> eventService.addEvent(event.getTitle(), DayOfWeek.MONDAY, LocalTime.of(6,0), Duration.ofHours(5), event.getClubId(), event.getCoachId()))
-                .isInstanceOf(EventTimeException.class)
-                .hasMessageContaining("Event not within the club's opening hours");
-    }
-
-
 }

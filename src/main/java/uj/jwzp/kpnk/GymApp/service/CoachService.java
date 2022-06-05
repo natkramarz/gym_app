@@ -9,19 +9,21 @@ import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
+import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
 @Service
 public class CoachService {
 
     private final CoachRepository repository;
+    private final EventTemplateService eventTemplateService;
     private final EventService eventService;
 
     @Autowired
-    public CoachService(CoachRepository repository, EventService eventService) {
+    public CoachService(CoachRepository repository, EventTemplateService eventTemplateService, EventService eventService) {
         this.repository = repository;
+        this.eventTemplateService = eventTemplateService;
         this.eventService = eventService;
     }
 
@@ -47,6 +49,7 @@ public class CoachService {
     public void removeCoach(int id) {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
         if (!eventService.eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
+        eventTemplateService.deleteEventTemplatesByCoach(id);
         repository.deleteById(id);
     }
 
