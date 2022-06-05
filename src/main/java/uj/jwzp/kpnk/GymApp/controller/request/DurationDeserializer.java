@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 
-public class DurationDeserializer extends com.fasterxml.jackson.datatype.jsr310.deser.DurationDeserializer {
+import com.fasterxml.jackson.datatype.jsr310.deser.DurationDeserializer;
+public class EventDurationDeserializer extends DurationDeserializer {
 
     public DurationDeserializer() {
         super();
