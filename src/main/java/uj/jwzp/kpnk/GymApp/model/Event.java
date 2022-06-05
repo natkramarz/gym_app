@@ -73,12 +73,4 @@ public class Event extends EventTemplate {
                 "coachId=" + this.getCoachId() +
                 '}';
     }
-
-    public int getPeopleLimit() {
-        return peopleLimit;
-    }
-
-    public void setPeopleLimit(int peopleLimit) {
-        this.peopleLimit = peopleLimit;
-    }
 }

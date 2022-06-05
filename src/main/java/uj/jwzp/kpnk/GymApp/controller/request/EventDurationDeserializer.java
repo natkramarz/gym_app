@@ -1,9 +1,7 @@
 package uj.jwzp.kpnk.GymApp.controller.request;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import uj.jwzp.kpnk.GymApp.exception.EventDurationParsingException;
 
 import java.io.IOException;
@@ -13,7 +11,7 @@ import java.time.format.DateTimeParseException;
 import com.fasterxml.jackson.datatype.jsr310.deser.DurationDeserializer;
 public class EventDurationDeserializer extends DurationDeserializer {
 
-    public DurationDeserializer() {
+    public EventDurationDeserializer() {
         super();
     }
 

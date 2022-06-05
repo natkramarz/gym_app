@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uj.jwzp.kpnk.GymApp.controller.request.DurationDeserializer;
+import uj.jwzp.kpnk.GymApp.controller.request.EventDurationDeserializer;
 import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.Event;

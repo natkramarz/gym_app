@@ -12,7 +12,7 @@ public record EventCreateRequest (
         String title,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy") LocalDate eventDate,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm") LocalTime startTime,
-        @JsonDeserialize(using = DurationDeserializer.class) Duration duration,
+        @JsonDeserialize(using = EventDurationDeserializer.class) Duration duration,
         int clubId,
         int coachId,
         int peopleLimit){
