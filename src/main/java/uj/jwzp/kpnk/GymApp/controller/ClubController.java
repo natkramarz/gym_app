@@ -53,13 +53,14 @@ public class ClubController {
     @PostMapping
     public ResponseEntity<?> addClub(@RequestBody ClubCreateRequest request) {
         var createdClub = service.addClub(request.name(), request.address(), request.whenOpen());
+        logger.info("Created club: {}", createdClub);
         return ResponseEntity.created(URI.create("/api/v1/clubs" + createdClub.getId())).body(createdClub);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
         var modifiedClub = service.modifyClub(id, request.name(), request.address(), request.whenOpen());
-        logger.info("Created club: {}", modifiedClub);
+        logger.info("Modified club: {}", modifiedClub);
         return ResponseEntity.ok(modifiedClub);
     }
 

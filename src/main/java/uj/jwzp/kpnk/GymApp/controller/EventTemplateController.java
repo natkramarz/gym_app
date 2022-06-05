@@ -1,5 +1,7 @@
 package uj.jwzp.kpnk.GymApp.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import java.util.Optional;
 public class EventTemplateController {
 
     private final EventTemplateService service;
+    Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
     public EventTemplateController(EventTemplateService service) {
@@ -51,24 +54,24 @@ public class EventTemplateController {
                 request.coachId(),
                 request.peopleLimit()
         );
-
+        logger.info("Created event: {}", createdEventTemplate);
         return ResponseEntity.created(URI.create("/api/v1/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyEventTemplate(@PathVariable int id, @RequestBody EventTemplateCreateRequest request) {
-        return ResponseEntity.ok(
-                service.modifyEventTemplate(
-                        id,
-                        request.title(),
-                        request.day(),
-                        request.time(),
-                        request.duration(),
-                        request.clubId(),
-                        request.coachId(),
-                        request.peopleLimit()
-                )
+        var modifiedEventTemplate = service.modifyEventTemplate(
+                id,
+                request.title(),
+                request.day(),
+                request.time(),
+                request.duration(),
+                request.clubId(),
+                request.coachId(),
+                request.peopleLimit()
         );
+        logger.info("Modified event template: {}", modifiedEventTemplate);
+        return ResponseEntity.ok(modifiedEventTemplate);
     }
 
     @DeleteMapping(path = "{id}")

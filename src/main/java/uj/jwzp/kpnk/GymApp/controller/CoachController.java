@@ -47,6 +47,7 @@ public class CoachController {
     @PostMapping()
     public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
         Coach createdCoach = service.addCoach(request.firstName(), request.lastName(), request.yearOfBirth());
+        logger.info("Created coach: {}", createdCoach);
         return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);
     }
 
