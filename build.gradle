@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.6.4'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id "org.flywaydb.flyway" version "8.5.12"
 }
 
 group = 'uj.jwzp.kpnk'
@@ -18,6 +19,12 @@ springBoot {
 
 jar {
 	enabled = false
+}
+
+flyway {
+	user = System.getenv('DATABASE_CONNECTION_USER')
+	password = System.getenv('DATABASE_CONNECTION_PASSWORD')
+	url = System.getenv('DATABASE_CONNECTION_URL')
 }
 
 dependencies {
@@ -38,3 +45,5 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+apply plugin: 'org.flywaydb.flyway'

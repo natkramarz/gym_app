@@ -5,12 +5,11 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Embeddable
-@Table(name="opening_hours")
 public class OpeningHours {
 
-    @Column(name = "valueFrom", columnDefinition = "TIME")
+    @Column(name = "value_from", columnDefinition = "TIME", nullable = false)
     private LocalTime from;
-    @Column(name = "valueTo", columnDefinition = "TIME")
+    @Column(name = "value_to", columnDefinition = "TIME", nullable = false)
     private LocalTime to;
 
     public OpeningHours() {

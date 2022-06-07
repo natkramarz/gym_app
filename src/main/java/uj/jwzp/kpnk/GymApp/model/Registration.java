@@ -12,8 +12,11 @@ public class Registration {
     @Column(updatable = false)
     private int id;
 
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String surname;
+    @Column(nullable = false)
     private int eventId;
 
     public Registration(int id, String name, String surname, int eventId) {
