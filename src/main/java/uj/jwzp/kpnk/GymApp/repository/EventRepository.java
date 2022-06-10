@@ -18,4 +18,5 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Event> findByClubId(Integer id);
     List<Event> findByClubIdAndEventDate(Integer id, LocalDate eventDate);
     List<Event> findByCoachIdAndEventDate(Integer coachId, LocalDate eventDate);
+    List<Event> removeByEventDateBefore(LocalDate eventDate);
 }

@@ -29,6 +29,19 @@ public class Event extends EventTemplate {
         this.eventDate = eventDate;
     }
 
+    public Event(EventTemplate eventTemplate, LocalDate eventDate) {
+        super(
+                eventTemplate.getTitle(),
+                eventTemplate.getDay(),
+                eventTemplate.getStartTime(),
+                eventTemplate.getDuration(),
+                eventTemplate.getClubId(),
+                eventTemplate.getCoachId(),
+                eventTemplate.getPeopleLimit()
+        );
+        this.eventDate = eventDate;
+    }
+
 
     public Event() {
     }

@@ -1,5 +1,7 @@
 package uj.jwzp.kpnk.GymApp.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -168,5 +170,29 @@ public class EventService {
         event.setStartTime(time);
         return repository.save(event);
     }
+
+    public void archiveEvents() {
+        repository.removeByEventDateBefore(LocalDate.now().minusDays(1));
+    }
+
+    public void addEvents() {
+        List<EventTemplate> eventTemplates = eventTemplateRepository.findByDay(DayOfWeek.from(LocalDate.now()));
+        List<Event> createdEvents = eventTemplates.stream()
+                .map(eventTemplate -> new Event(eventTemplate, LocalDate.now().plusDays(30)))
+                .filter(event ->
+                        areEventDetailsValid(
+                            event.getTitle(),
+                            event.getDay(),
+                            event.getStartTime(),
+                            event.getDuration(),
+                            event.getClubId(),
+                            event.getCoachId(),
+                            event.getEventDate(),
+                            event.getPeopleLimit())
+                        )
+                .toList();
+        repository.saveAll(createdEvents);
+    }
+
 
 }
