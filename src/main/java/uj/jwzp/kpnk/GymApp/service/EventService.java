@@ -171,14 +171,14 @@ public class EventService {
         return repository.save(event);
     }
 
-    public void archiveEvents() {
-        repository.removeByEventDateBefore(LocalDate.now().minusDays(1));
+    public void archiveEvents(int numOfDays) {
+        repository.removeByEventDateBefore(LocalDate.now().minusDays(numOfDays));
     }
 
-    public void addEvents() {
+    public void addEvents(int numOfDays) {
         List<EventTemplate> eventTemplates = eventTemplateRepository.findByDay(DayOfWeek.from(LocalDate.now()));
         List<Event> createdEvents = eventTemplates.stream()
-                .map(eventTemplate -> new Event(eventTemplate, LocalDate.now().plusDays(30)))
+                .map(eventTemplate -> new Event(eventTemplate, LocalDate.now().plusDays(numOfDays)))
                 .filter(event ->
                         areEventDetailsValid(
                             event.getTitle(),

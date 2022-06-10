@@ -12,7 +12,7 @@ import uj.jwzp.kpnk.GymApp.service.EventService;
 public class ScheduleEventsJob {
 
     private final EventService eventService;
-
+    private final int numOfDays = 30;
 
     @Autowired
     public ScheduleEventsJob(EventService eventService) {
@@ -22,12 +22,12 @@ public class ScheduleEventsJob {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void archiveEvents() {
-        eventService.archiveEvents();
+        eventService.archiveEvents(numOfDays);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
     public void addEvents() {
-        eventService.addEvents();
+        eventService.addEvents(numOfDays);
     }
 
 }
