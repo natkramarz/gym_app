@@ -1,6 +1,7 @@
 package uj.jwzp.kpnk.GymApp.model;
 
 import org.springframework.hateoas.RepresentationModel;
+import uj.jwzp.kpnk.GymApp.controller.request.ClubCreateRequest;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name="club")
-public class Club extends RepresentationModel<Club> {
+public class Club extends RepresentationModel<Club> implements ServiceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

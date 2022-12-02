@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name="coach")
-public class Coach {
+public class Coach implements ServiceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
