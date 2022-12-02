@@ -9,7 +9,7 @@ import java.util.Objects;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Table(name="event_template")
-public class EventTemplate {
+public class EventTemplate implements ServiceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)

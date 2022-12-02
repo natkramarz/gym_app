@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
@@ -13,7 +11,6 @@ import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.service.CoachService;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -31,12 +28,12 @@ public class CoachController {
 
     @GetMapping
     public List<Coach> allCoaches() {
-        return service.allCoaches().stream().toList();
+        return service.getAll().stream().toList();
     }
 
     @GetMapping(path = "{id}")
     public Coach getCoach(@PathVariable int id) {
-        return service.coach(id);
+        return service.get(id);
     }
 
     @GetMapping(params = {"page", "size"})
@@ -46,21 +43,21 @@ public class CoachController {
 
     @PostMapping()
     public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
-        Coach createdCoach = service.addCoach(request.firstName(), request.lastName(), request.yearOfBirth());
+        Coach createdCoach = service.add(request);
         logger.info("Created coach: {}", createdCoach);
         return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyCoach(@PathVariable int id, @RequestBody CoachCreateRequest request) {
-        var modifiedCoach = service.modifyCoach(id, request.firstName(), request.lastName(), request.yearOfBirth());
+        var modifiedCoach = service.modify(id, request);
         logger.info("Modified coach: {}", modifiedCoach);
         return ResponseEntity.ok(modifiedCoach);
     }
 
     @DeleteMapping(path = "{id}")
     public ResponseEntity<?> removeCoach(@PathVariable int id) {
-        service.removeCoach(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
