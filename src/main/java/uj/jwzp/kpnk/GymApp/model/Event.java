@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name="event")
-public class Event extends EventTemplate {
+public class Event extends EventTemplate implements ServiceEntity {
 
     @Column(columnDefinition = "DATE")
     LocalDate eventDate;

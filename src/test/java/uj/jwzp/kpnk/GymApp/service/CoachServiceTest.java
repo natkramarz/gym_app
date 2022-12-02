@@ -7,11 +7,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
-import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public class CoachServiceTest {
     public void getAllCoachesWithOneCoach() {
         given(coachRepository.findAll()).willReturn(List.of(coach));
 
-        var coaches = coachService.allCoaches();
+        var coaches = coachService.getAll();
         assertThat(coaches).containsExactly(coach);
     }
 
@@ -51,14 +51,14 @@ public class CoachServiceTest {
     public void getAllCoachesEmpty() {
         given(coachRepository.findAll()).willReturn(List.of());
 
-        Assertions.assertTrue(coachService.allCoaches().isEmpty());
+        Assertions.assertTrue(coachService.getAll().isEmpty());
     }
 
     @Test
     public void addValidCoach() {
-        given(coachService.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth())).willReturn(coach);
+        given(coachService.add(new CoachCreateRequest(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth()))).willReturn(coach);
 
-        var serviceCoach = coachService.addCoach(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth());
+        var serviceCoach = coachService.add(new CoachCreateRequest(coach.getFirstName(), coach.getLastName(), coach.getYearOfBirth()));
         Assertions.assertEquals(serviceCoach, coach);
     }
     @Test
@@ -67,7 +67,7 @@ public class CoachServiceTest {
         Coach uut = new Coach(1, "modified1", "modified2", 2001);
         given(coachRepository.save(uut)).willReturn(uut);
 
-        Coach serviceCoach = coachService.modifyCoach(1, "modified1", "modified2", 2001);
+        Coach serviceCoach = coachService.modify(1, new CoachCreateRequest("modified1", "modified2", 2001));
 
         Assertions.assertEquals(serviceCoach, uut);
     }
@@ -76,7 +76,7 @@ public class CoachServiceTest {
     public void modifyNonExistentCoach() {
         given(coachRepository.findById(2)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> coachService.modifyCoach(2, "test", "test", 2000))
+        assertThatThrownBy(() -> coachService.modify(2, new CoachCreateRequest("test", "test", 2000)))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown coach id: 2");
     }
@@ -85,7 +85,7 @@ public class CoachServiceTest {
     public void removeNonExistentCoach() {
         given(coachRepository.findById(anyInt())).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> coachService.removeCoach(1))
+        assertThatThrownBy(() -> coachService.delete(1))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown coach id: 1");
     }
@@ -95,7 +95,7 @@ public class CoachServiceTest {
         given(coachRepository.findById(1)).willReturn(Optional.of(coach));
         given(eventService.eventsByCoach(1)).willReturn(List.of(new Event()));
 
-        assertThatThrownBy(() -> coachService.removeCoach(1))
+        assertThatThrownBy(() -> coachService.delete(1))
                 .isInstanceOf(AssignedEventsException.class)
                 .hasMessageContaining("There are events assigned to");
     }
