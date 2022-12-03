@@ -32,8 +32,8 @@ public class CoachService implements ServiceLayer {
 
 
     @Override
-    public Set<Coach> getAll() {
-        return new HashSet<>(repository.findAll());
+    public List<Coach> getAll() {
+        return repository.findAll();
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventPastDateException;
@@ -23,10 +24,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -71,7 +69,7 @@ class EventServiceTest {
         given(coachRepository.findById(0)).willReturn(Optional.of(coach));
         given(repository.save(event)).willReturn(event);
 
-        var newEvent = eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8);
+        var newEvent = eventService.add(new EventCreateRequest("event testowy", LocalDate.of(2022, 7, 1), LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, 8));
         assertEquals(event, newEvent);
     }
 
@@ -82,7 +80,7 @@ class EventServiceTest {
         given(coachRepository.findById(2)).willReturn(Optional.empty());
 
 
-        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 2, LocalDate.of(2022, 6, 1), 8))
+        assertThatThrownBy(() -> eventService.add(new EventCreateRequest("event testowy", LocalDate.of(2022, 6, 1), LocalTime.of(12, 0), Duration.ofHours(2), 0, 2, 8)))
                 .isInstanceOf(CoachNotFoundException.class)
                 .hasMessageContaining("Unknown coach id");
     }
@@ -92,7 +90,7 @@ class EventServiceTest {
         given(clubRepository.findById(0)).willReturn(Optional.of(club));
         given(coachRepository.findById(0)).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), -5))
+        assertThatThrownBy(() -> eventService.add(new EventCreateRequest("event testowy", LocalDate.of(2022, 7, 1), LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, -5)))
                 .isInstanceOf(PeopleLimitFormatException.class)
                 .hasMessageContaining("People limit is negative");
     }
@@ -102,7 +100,7 @@ class EventServiceTest {
         given(clubRepository.findById(0)).willReturn(Optional.of(club));
         given(coachRepository.findById(0)).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 5, 1), 5))
+        assertThatThrownBy(() -> eventService.add(new EventCreateRequest("event testowy", LocalDate.of(2022, 5, 1), LocalTime.of(12, 0), Duration.ofHours(2), 0, 0, 5)))
                 .isInstanceOf(EventPastDateException.class)
                 .hasMessageContaining("new event is in the past");
     }
@@ -112,7 +110,7 @@ class EventServiceTest {
         given(clubRepository.findById(0)).willReturn(Optional.of(club));
         given(coachRepository.findById(0)).willReturn(Optional.of(coach));
 
-        assertThatThrownBy(() -> eventService.createEvent("event testowy", LocalTime.of(22, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 5))
+        assertThatThrownBy(() -> eventService.add(new EventCreateRequest("event testowy", LocalDate.of(2022, 7, 1), LocalTime.of(22, 0), Duration.ofHours(2), 0, 0, 5)))
                 .isInstanceOf(EventTimeException.class)
                 .hasMessageContaining("not within opening hours of club");
     }
@@ -143,9 +141,9 @@ class EventServiceTest {
         Event event = new Event(0, "event testowy", LocalDate.of(2022, 7, 1), Duration.ofHours(2), LocalTime.of(12, 0), 0, 0, 8);
         given(clubRepository.findById(0)).willReturn(Optional.of(club));
         given(coachRepository.findById(0)).willReturn(Optional.of(coach));
-        given(repository.findByCoachIdAndEventDate(0, LocalDate.of(2022, 7, 1))).willReturn(List.of(event));
+        given(repository.findByCoachIdAndEventDate(0, LocalDate.of(2022, 7, 1))).willReturn(Set.of(event));
 
-        assertThatThrownBy(() -> eventService.createEvent("event z zarezerwowanym trenerem", LocalTime.of(13, 0), Duration.ofHours(2), 0, 0, LocalDate.of(2022, 7, 1), 8))
+        assertThatThrownBy(() -> eventService.add(new EventCreateRequest("event z zarezerwowanym trenerem", LocalDate.of(2022, 7, 1), LocalTime.of(13, 0), Duration.ofHours(2), 0, 0, 8)))
                 .isInstanceOf(CoachAlreadyBookedException.class)
                 .hasMessageContaining("is already booked during event hours");
     }
