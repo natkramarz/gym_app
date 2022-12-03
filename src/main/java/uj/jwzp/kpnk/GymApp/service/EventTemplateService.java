@@ -6,6 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
+import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
+import uj.jwzp.kpnk.GymApp.controller.request.EventTemplateCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
@@ -16,6 +19,7 @@ import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundExcepti
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateTimeException;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
+import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 import uj.jwzp.kpnk.GymApp.repository.EventTemplateRepository;
@@ -27,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class EventTemplateService {
+public class EventTemplateService implements ServiceLayer {
 
     private final EventTemplateRepository repository;
     private final ClubRepository clubRepository;
@@ -52,26 +56,23 @@ public class EventTemplateService {
         return false;
     }
 
-    private boolean areEventTemplateDetailsValid(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
-        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
-        if (title == null || title.length() == 0) throw new EventTitleFormatException(title);
-        if (coachRepository.findById(coachId).isEmpty())  throw new CoachNotFoundException(coachId);
-        if (duration.compareTo(Duration.ofHours(24)) > 0) throw new EventTemplateDurationException(title);
-        if (peopleLimit < 0) throw new PeopleLimitFormatException(peopleLimit);
-        if (!isEventTemplateBetweenOpeningHours(clubRepository.findById(clubId).get().getWhenOpen(), day, time, duration)) throw new EventTemplateTimeException(title);
+    private boolean areEventTemplateDetailsValid(EventTemplate eventTemplate) {
+        if (clubRepository.findById(eventTemplate.getClubId()).isEmpty()) throw new ClubNotFoundException(eventTemplate.getClubId());
+        if (eventTemplate.getTitle() == null || eventTemplate.getTitle().length() == 0) throw new EventTitleFormatException(eventTemplate.getTitle());
+        if (coachRepository.findById(eventTemplate.getCoachId()).isEmpty())  throw new CoachNotFoundException(eventTemplate.getCoachId());
+        if (eventTemplate.getDuration().compareTo(Duration.ofHours(24)) > 0) throw new EventTemplateDurationException(eventTemplate.getTitle());
+        if (eventTemplate.getPeopleLimit() < 0) throw new PeopleLimitFormatException(eventTemplate.getPeopleLimit());
+        if (!isEventTemplateBetweenOpeningHours(clubRepository.findById(eventTemplate.getClubId()).get().getWhenOpen(), eventTemplate.getDay(), eventTemplate.time, eventTemplate.getDuration())) throw new EventTemplateTimeException(eventTemplate.getTitle());
 
         return true;
     }
 
-    public EventTemplate createEventTemplate(String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
-        if (!areEventTemplateDetailsValid(title, day, time, duration, clubId, coachId, peopleLimit)) return null;
+    public EventTemplate createEventTemplate(EventTemplateCreateRequest request) {
+        if (!areEventTemplateDetailsValid(request.asObject()))
+            return null;
 
-        EventTemplate eventTemplate = new EventTemplate(title, day, time, duration, clubId, coachId, peopleLimit);
+        EventTemplate eventTemplate = request.asObject();
         return repository.save(eventTemplate);
-    }
-
-    public List<EventTemplate> allEventTemplates() {
-        return repository.findAll();
     }
 
     public List<EventTemplate> eventTemplatesByClub(int clubId) {
@@ -87,16 +88,6 @@ public class EventTemplateService {
     }
 
 
-    public EventTemplate eventTemplate(int id) {
-        return repository.findById(id).orElseThrow(() -> new EventTemplateNotFoundException(id));
-    }
-
-    public void deleteEventTemplate(int id) {
-        if (repository.findById(id).isEmpty()) throw new EventTemplateNotFoundException(id);
-
-        repository.deleteById(id);
-    }
-
     public void deleteEventTemplatesByCoach(int coachId) {
         repository.deleteAllByCoachId(coachId);
     }
@@ -105,16 +96,44 @@ public class EventTemplateService {
         repository.deleteAllByIdInBatch(eventIds);
     }
 
-    public EventTemplate modifyEventTemplate(int id, String title, DayOfWeek day, LocalTime time, Duration duration, int clubId, int coachId, int peopleLimit) {
-        if (repository.findById(id).isEmpty()) throw new EventTemplateNotFoundException(id);
-        if (!areEventTemplateDetailsValid(title, day, time, duration, clubId, coachId, peopleLimit)) return null;
-
-        EventTemplate modified = new EventTemplate(id, title, day, time, duration, clubId, coachId, peopleLimit);
-        return repository.save(modified);
-    }
-
     public Page<EventTemplate> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         return repository.findAll(paging);
+    }
+
+    @Override
+    public List<EventTemplate> getAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public ServiceEntity get(int id) {
+        return repository.findById(id).orElseThrow(() -> new EventTemplateNotFoundException(id));
+    }
+
+    @Override
+    public ServiceEntity add(CreateRequest createRequest) {
+        if (!areEventTemplateDetailsValid(((EventTemplateCreateRequest)createRequest).asObject()))
+            return null;
+
+        EventTemplate eventTemplate = ((EventTemplateCreateRequest)createRequest).asObject();
+        return repository.save(eventTemplate);
+    }
+
+    @Override
+    public ServiceEntity modify(int id, CreateRequest createRequest) {
+        if (repository.findById(id).isEmpty()) throw new EventTemplateNotFoundException(id);
+        if (!areEventTemplateDetailsValid(((EventCreateRequest)createRequest).asObject()))
+            return null;
+
+        EventTemplate modified = ((EventCreateRequest)createRequest).asObject();
+        return repository.save(modified);
+    }
+
+    @Override
+    public void delete(int id) {
+        if (repository.findById(id).isEmpty()) throw new EventTemplateNotFoundException(id);
+
+        repository.deleteById(id);
     }
 }

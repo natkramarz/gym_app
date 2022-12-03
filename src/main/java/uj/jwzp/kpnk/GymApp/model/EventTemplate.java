@@ -3,6 +3,7 @@ package uj.jwzp.kpnk.GymApp.model;
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Table(name="event_template")
 public class EventTemplate implements ServiceEntity {
 
+    public LocalTime time;
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(updatable = false)
@@ -151,5 +153,10 @@ public class EventTemplate implements ServiceEntity {
 
     public void setPeopleLimit(int peopleLimit) {
         this.peopleLimit = peopleLimit;
+    }
+
+
+    public Event toEvent(LocalDate eventDate){
+        return new Event(title, eventDate, duration, startTime, clubId, coachId, peopleLimit);
     }
 }

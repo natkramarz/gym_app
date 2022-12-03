@@ -13,6 +13,7 @@ import uj.jwzp.kpnk.GymApp.controller.request.EventDurationDeserializer;
 import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.Event;
+import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.service.EventService;
 
 import java.net.URI;
@@ -35,8 +36,8 @@ public class EventController {
     }
 
     @GetMapping
-    public List<Event> allEvents(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
-        if (clubId.isEmpty() && coachId.isEmpty()) return service.allEvents().stream().toList();
+    public List<? extends ServiceEntity> allEvents(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
+        if (clubId.isEmpty() && coachId.isEmpty()) return service.getAll().stream().toList();
         if (clubId.isPresent()) return service.eventsByClub(clubId.get()).stream().toList();
         return service.eventsByCoach(coachId.get()).stream().toList();
     }
@@ -48,19 +49,11 @@ public class EventController {
 
     @GetMapping("{id}")
     public ResponseEntity<?> getEvent(@PathVariable int id) {
-        return ResponseEntity.ok(service.event(id));
+        return ResponseEntity.ok(service.get(id));
     }
     @PostMapping
     public ResponseEntity<?> addEvent(@RequestBody EventCreateRequest request) {
-        Event createdEvent = service.createEvent(
-                request.title(),
-                request.startTime(),
-                request.duration(),
-                request.clubId(),
-                request.coachId(),
-                request.eventDate(),
-                request.peopleLimit()
-        );
+        Event createdEvent = service.add( request);
         logger.info("Created event: {}", createdEvent);
         return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
@@ -74,16 +67,9 @@ public class EventController {
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyEvent(@PathVariable int id, @RequestBody EventCreateRequest request) {
-        var modifiedEvent = service.modifyEvent(
+        var modifiedEvent = service.modify(
                 id,
-                request.title(),
-                request.eventDate().getDayOfWeek(),
-                request.startTime(),
-                request.duration(),
-                request.clubId(),
-                request.coachId(),
-                request.eventDate(),
-                request.peopleLimit()
+                request
         );
         logger.info("Modified event: {}", modifiedEvent);
         return ResponseEntity.ok(modifiedEvent);
@@ -96,7 +82,7 @@ public class EventController {
 
     @DeleteMapping(path = "{id}")
     public ResponseEntity<?> cancelEvent(@PathVariable int id) {
-       service.deleteEvent(id);
+       service.delete(id);
        return ResponseEntity.noContent().build();
     }
 

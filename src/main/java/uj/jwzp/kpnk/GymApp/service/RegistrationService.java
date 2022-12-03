@@ -1,21 +1,24 @@
 package uj.jwzp.kpnk.GymApp.service;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
+import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
+import uj.jwzp.kpnk.GymApp.controller.request.RegistrationCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.event.EventFullyBookedException;
+import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.registration.RegistrationNotFound;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.Registration;
+import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 import uj.jwzp.kpnk.GymApp.repository.RegistrationRepository;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
-public class RegistrationService {
+public class RegistrationService implements ServiceLayer {
 
     private final RegistrationRepository repository;
     private final EventRepository eventRepository;
@@ -26,26 +29,34 @@ public class RegistrationService {
         this.eventRepository = eventRepository;
     }
 
-    public Registration createRegistration(int eventId, String name, String surname) {
+    @Override
+    public Registration get(int id) {
+        return repository.findById(id).orElseThrow(() -> new RegistrationNotFound(id));
+    }
+
+    @Override
+    public List<Registration> getAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public Registration add(CreateRequest createRequest) {
+        int eventId = ((RegistrationCreateRequest)createRequest).eventId();
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) throw new EventNotFoundException(eventId);
         Event event = eventOptional.get();
         if (repository.findByEventId(eventId).size() >= event.getPeopleLimit()) throw new EventFullyBookedException(eventId);
-        Registration registration = new Registration(eventId, name, surname);
-        return repository.save(registration);
+        Registration registration = ((RegistrationCreateRequest)createRequest).asObject();
+        return repository.save(registration);    }
+
+    @Override
+    public Registration modify(int id, CreateRequest createRequest) {
+        throw new NotImplementedException();
     }
 
-    public void deleteRegistration(int id) {
+    @Override
+    public void delete(int id) {
         if (eventRepository.findById(id).isEmpty()) throw new EventNotFoundException(id);
         repository.deleteById(id);
     }
-
-    public Registration registration(int id) {
-        return repository.findById(id).orElseThrow(() -> new RegistrationNotFound(id));
-    }
-
-    public Set<Registration> allRegistrations() {
-        return new HashSet<>(repository.findAll());
-    }
-
 }

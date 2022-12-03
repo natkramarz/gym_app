@@ -19,8 +19,8 @@ public class Event extends EventTemplate implements ServiceEntity {
         this.eventDate = eventDate;
     }
 
-    public Event(String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, LocalDate eventDate, int peopleLimit) {
-        super(title, day, startTime, duration, clubId, coachId, peopleLimit);
+    public Event(String title, LocalDate eventDate, Duration duration, LocalTime startTime, int clubId, int coachId, int peopleLimit) {
+        super(title, eventDate.getDayOfWeek(), startTime, duration, clubId, coachId, peopleLimit);
         this.eventDate = eventDate;
     }
 

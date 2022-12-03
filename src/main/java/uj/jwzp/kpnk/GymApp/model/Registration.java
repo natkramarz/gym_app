@@ -5,7 +5,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "registration")
-public class Registration {
+public class Registration implements ServiceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,7 @@ public class Registration {
         this.eventId = eventId;
     }
 
-    public Registration(int eventId, String name, String surname) {
+    public Registration(String name, String surname, int eventId) {
         this.name = name;
         this.surname = surname;
         this.eventId = eventId;

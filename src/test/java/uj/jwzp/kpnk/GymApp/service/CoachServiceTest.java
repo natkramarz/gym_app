@@ -12,10 +12,12 @@ import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
+import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -43,7 +45,7 @@ public class CoachServiceTest {
     public void getAllCoachesWithOneCoach() {
         given(coachRepository.findAll()).willReturn(List.of(coach));
 
-        var coaches = coachService.getAll();
+        List<Coach> coaches = coachService.getAll();
         assertThat(coaches).containsExactly(coach);
     }
 
@@ -93,7 +95,7 @@ public class CoachServiceTest {
     @Test
     public void removeCoachWithAssignedEvents() {
         given(coachRepository.findById(1)).willReturn(Optional.of(coach));
-        given(eventService.eventsByCoach(1)).willReturn(List.of(new Event()));
+        given(eventService.eventsByCoach(1)).willReturn(Set.of(new Event()));
 
         assertThatThrownBy(() -> coachService.delete(1))
                 .isInstanceOf(AssignedEventsException.class)

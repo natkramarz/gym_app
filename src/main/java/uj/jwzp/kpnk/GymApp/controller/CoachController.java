@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Coach;
+import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.service.CoachService;
 
 import java.net.URI;
@@ -27,7 +28,7 @@ public class CoachController {
     }
 
     @GetMapping
-    public List<Coach> allCoaches() {
+    public List<? extends ServiceEntity> allCoaches() {
         return service.getAll().stream().toList();
     }
 

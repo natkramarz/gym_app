@@ -13,12 +13,10 @@ import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
+import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,8 +34,8 @@ public class ClubService implements ServiceLayer {
     }
 
     @Override
-    public Set<Club> getAll() {
-        return new HashSet(repository.findAll());
+    public List<Club> getAll() {
+        return repository.findAll();
     }
 
     @Override
@@ -59,7 +57,7 @@ public class ClubService implements ServiceLayer {
 
         eventService.eventsByClub(id)
                 .forEach(event -> {
-                    if (!eventService.isEventBetweenOpeningHours(((ClubCreateRequest)createRequest).whenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) {
+                    if (!eventService.isEventBetweenOpeningHours(((ClubCreateRequest) createRequest).whenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) {
                         throw new ClubOpeningHoursException(id);
                     }
                 });
