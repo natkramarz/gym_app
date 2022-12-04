@@ -7,14 +7,9 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@SequenceGenerator(name = "default_gen", sequenceName = "event_template_seq", allocationSize = 1)
 @Table(name="event_template")
-public class EventTemplate {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
-    @Column(updatable = false)
-    private int id;
+public class EventTemplate extends DomainObject {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
@@ -48,7 +43,7 @@ public class EventTemplate {
     }
 
     public EventTemplate(int id, String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, int peopleLimit) {
-        this.id = id;
+        super(id);
         this.title = title;
         this.day = day;
         this.startTime = startTime;
@@ -56,10 +51,6 @@ public class EventTemplate {
         this.clubId = clubId;
         this.coachId = coachId;
         this.peopleLimit = peopleLimit;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getTitle() {
@@ -91,7 +82,7 @@ public class EventTemplate {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (EventTemplate) obj;
-        return this.id == that.id &&
+        return this.getId() == that.getId() &&
                 Objects.equals(this.title, that.title) &&
                 Objects.equals(this.day, that.day) &&
                 Objects.equals(this.startTime, that.startTime) &&
@@ -102,13 +93,13 @@ public class EventTemplate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, day, startTime, duration, clubId, coachId);
+        return Objects.hash(this.getId(), title, day, startTime, duration, clubId, coachId);
     }
 
     @Override
     public String toString() {
         return "EventTemplate[" +
-                "id=" + id + ", " +
+                "id=" + this.getId() + ", " +
                 "title=" + title + ", " +
                 "day=" + day + ", " +
                 "time=" + startTime + ", " +
@@ -117,11 +108,7 @@ public class EventTemplate {
                 "coachId=" + coachId + ']';
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setTitle(String title) {
+    private void setTitle(String title) {
         this.title = title;
     }
 
@@ -133,15 +120,15 @@ public class EventTemplate {
         this.startTime = time;
     }
 
-    public void setDuration(Duration duration) {
+    private void setDuration(Duration duration) {
         this.duration = duration;
     }
 
-    public void setClubId(int clubId) {
+    private void setClubId(int clubId) {
         this.clubId = clubId;
     }
 
-    public void setCoachId(int coachId) {
+    private void setCoachId(int coachId) {
         this.coachId = coachId;
     }
 

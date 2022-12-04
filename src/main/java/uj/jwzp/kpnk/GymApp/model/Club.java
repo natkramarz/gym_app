@@ -9,12 +9,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name="club")
-public class Club extends RepresentationModel<Club> {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false)
-    private int id;
+@SequenceGenerator(name = "default_gen", sequenceName = "club_seq", allocationSize = 1)
+public class Club extends DomainObject {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
@@ -30,7 +26,7 @@ public class Club extends RepresentationModel<Club> {
     }
 
     public Club(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        this.id = id;
+        super(id);
         this.name = name;
         this.address = address;
         this.whenOpen = whenOpen;
@@ -47,16 +43,12 @@ public class Club extends RepresentationModel<Club> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Club club = (Club) o;
-        return id == club.id;
+        return this.getId() == club.getId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    public int getId() {
-        return id;
+        return Objects.hash(this.getId());
     }
 
     public String getName() {
@@ -74,14 +66,10 @@ public class Club extends RepresentationModel<Club> {
     @Override
     public String toString() {
         return "Club[" +
-                "id=" + id + ", " +
+                "id=" + this.getId() + ", " +
                 "name=" + name + ", " +
                 "address=" + address + ", " +
                 "whenOpen=" + whenOpen + ']';
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public void setName(String name) {
