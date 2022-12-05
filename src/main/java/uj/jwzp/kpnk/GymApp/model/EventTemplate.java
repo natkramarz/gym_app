@@ -15,6 +15,7 @@ public class EventTemplate extends DomainObject {
     private String title;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "`day`")
     private DayOfWeek day;
 
     @Column(columnDefinition = "TIME")

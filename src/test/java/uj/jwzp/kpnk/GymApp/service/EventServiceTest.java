@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
-
     private static Club club;
     private static Coach coach;
     private static Map<DayOfWeek, OpeningHours> whenOpen;

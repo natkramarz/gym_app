@@ -3,7 +3,6 @@ package uj.jwzp.kpnk.GymApp.model;
 import javax.persistence.*;
 
 @MappedSuperclass
-
 public class DomainObject {
 
     @Id
