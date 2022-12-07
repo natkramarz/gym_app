@@ -1,7 +1,6 @@
 package uj.jwzp.kpnk.GymApp.dto.assembler;
 
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import uj.jwzp.kpnk.GymApp.controller.ClubController;

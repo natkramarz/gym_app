@@ -58,24 +58,48 @@ public class EventTemplate extends DomainObject implements ServiceEntity {
         return title;
     }
 
+    private void setTitle(String title) {
+        this.title = title;
+    }
+
     public DayOfWeek getDay() {
         return day;
+    }
+
+    public void setDay(DayOfWeek day) {
+        this.day = day;
     }
 
     public LocalTime getStartTime() {
         return startTime;
     }
 
+    public void setStartTime(LocalTime time) {
+        this.startTime = time;
+    }
+
     public Duration getDuration() {
         return duration;
+    }
+
+    private void setDuration(Duration duration) {
+        this.duration = duration;
     }
 
     public int getClubId() {
         return clubId;
     }
 
+    private void setClubId(int clubId) {
+        this.clubId = clubId;
+    }
+
     public int getCoachId() {
         return coachId;
+    }
+
+    private void setCoachId(int coachId) {
+        this.coachId = coachId;
     }
 
     @Override
@@ -107,30 +131,6 @@ public class EventTemplate extends DomainObject implements ServiceEntity {
                 "duration=" + duration + ", " +
                 "clubId=" + clubId + ", " +
                 "coachId=" + coachId + ']';
-    }
-
-    private void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDay(DayOfWeek day) {
-        this.day = day;
-    }
-
-    public void setStartTime(LocalTime time) {
-        this.startTime = time;
-    }
-
-    private void setDuration(Duration duration) {
-        this.duration = duration;
-    }
-
-    private void setClubId(int clubId) {
-        this.clubId = clubId;
-    }
-
-    private void setCoachId(int coachId) {
-        this.coachId = coachId;
     }
 
     public int getPeopleLimit() {

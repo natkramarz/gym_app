@@ -4,6 +4,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
+
 import java.time.DayOfWeek;
 import java.util.Map;
 import java.util.Objects;
@@ -33,16 +34,32 @@ public class ClubRepresentation extends RepresentationModel<ClubRepresentation> 
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {
         return address;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public Map<DayOfWeek, OpeningHours> getWhenOpen() {
         return whenOpen;
+    }
+
+    public void setWhenOpen(Map<DayOfWeek, OpeningHours> whenOpen) {
+        this.whenOpen = whenOpen;
     }
 
     @Override
@@ -52,21 +69,5 @@ public class ClubRepresentation extends RepresentationModel<ClubRepresentation> 
                 "name=" + name + ", " +
                 "address=" + address + ", " +
                 "whenOpen=" + whenOpen + ']';
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setWhenOpen(Map<DayOfWeek, OpeningHours> whenOpen) {
-        this.whenOpen = whenOpen;
     }
 }

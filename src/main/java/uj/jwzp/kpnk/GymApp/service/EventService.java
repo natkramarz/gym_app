@@ -1,7 +1,5 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;

@@ -45,7 +45,7 @@ public class EventTemplateController {
 
     @PostMapping
     public ResponseEntity<?> addEventTemplate(@RequestBody EventTemplateCreateRequest request) {
-        EventTemplate createdEventTemplate = service.createEventTemplate(request);
+        var createdEventTemplate = service.createEventTemplate(request);
         logger.info("Created event: {}", createdEventTemplate);
         return ResponseEntity.created(URI.create("/api/v1/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
     }

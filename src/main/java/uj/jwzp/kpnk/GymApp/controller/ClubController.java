@@ -22,10 +22,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/v1/clubs")
 public class ClubController {
 
-    Logger logger = LoggerFactory.getLogger("jsonLogger");
-
     private final ClubService service;
     private final ClubRepresentationAssembler clubRepresentationAssembler;
+    Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
     public ClubController(ClubService service, ClubRepresentationAssembler clubRepresentationAssembler) {
@@ -40,7 +39,7 @@ public class ClubController {
 
     @GetMapping(path = "{id}")
     public ClubRepresentation getClub(@PathVariable int id) {
-        Club club = service.get(id);
+        var club = service.get(id);
         return clubRepresentationAssembler.toModel(club)
                 .add(linkTo(methodOn(ClubController.class).allClubs()).withRel("clubs"));
     }
@@ -52,14 +51,14 @@ public class ClubController {
 
     @PostMapping
     public ResponseEntity<?> addClub(@RequestBody ClubCreateRequest request) {
-        Club createdClub = (Club) service.add(request);
+        var createdClub = service.add(request);
         logger.info("Created club: {}", createdClub);
         return ResponseEntity.created(URI.create("/api/v1/clubs" + createdClub.getId())).body(createdClub);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
-        Club modifiedClub = (Club) service.modify(id, request);
+        var modifiedClub = service.modify(id, request);
         logger.info("Modified club: {}", modifiedClub);
         return ResponseEntity.ok(modifiedClub);
     }

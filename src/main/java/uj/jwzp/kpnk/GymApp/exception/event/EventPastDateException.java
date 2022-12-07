@@ -9,6 +9,6 @@ import java.time.LocalDate;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class EventPastDateException extends GymAppException {
     public EventPastDateException(LocalDate date) {
-        super("Date" + date +" of new event is in the past" );
+        super("Date" + date + " of new event is in the past");
     }
 }

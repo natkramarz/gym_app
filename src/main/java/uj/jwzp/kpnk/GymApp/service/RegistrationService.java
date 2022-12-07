@@ -4,13 +4,11 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.controller.request.RegistrationCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.event.EventFullyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.registration.RegistrationNotFound;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.Registration;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 import uj.jwzp.kpnk.GymApp.repository.RegistrationRepository;
 
