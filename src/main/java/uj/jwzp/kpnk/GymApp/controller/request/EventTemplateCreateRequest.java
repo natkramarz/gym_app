@@ -17,7 +17,7 @@ public record EventTemplateCreateRequest(
         int clubId,
         int coachId,
         int peopleLimit
-    ) implements CreateRequest {
+    ) implements CreateRequest<EventTemplate> {
 
     @Override
     public EventTemplate asObject() {

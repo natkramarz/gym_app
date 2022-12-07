@@ -28,7 +28,7 @@ public class CoachController {
     }
 
     @GetMapping
-    public List<? extends ServiceEntity> allCoaches() {
+    public List<Coach> allCoaches() {
         return service.getAll().stream().toList();
     }
 

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class RegistrationService implements ServiceLayer {
+public class RegistrationService implements ServiceLayer<Registration> {
 
     private final RegistrationRepository repository;
     private final EventRepository eventRepository;
@@ -40,17 +40,19 @@ public class RegistrationService implements ServiceLayer {
     }
 
     @Override
-    public Registration add(CreateRequest createRequest) {
-        int eventId = ((RegistrationCreateRequest)createRequest).eventId();
+    public Registration add(CreateRequest<Registration> createRequest) {
+        int eventId = createRequest.asObject().getEventId();
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) throw new EventNotFoundException(eventId);
         Event event = eventOptional.get();
-        if (repository.findByEventId(eventId).size() >= event.getPeopleLimit()) throw new EventFullyBookedException(eventId);
-        Registration registration = ((RegistrationCreateRequest)createRequest).asObject();
-        return repository.save(registration);    }
+        if (repository.findByEventId(eventId).size() >= event.getPeopleLimit())
+            throw new EventFullyBookedException(eventId);
+        Registration registration = createRequest.asObject();
+        return repository.save(registration);
+    }
 
     @Override
-    public Registration modify(int id, CreateRequest createRequest) {
+    public Registration modify(int id, CreateRequest<Registration> createRequest) {
         throw new NotImplementedException();
     }
 

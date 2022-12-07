@@ -7,19 +7,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.controller.request.EventTemplateCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventTitleFormatException;
-import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateDurationException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateTimeException;
+import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 import uj.jwzp.kpnk.GymApp.repository.EventTemplateRepository;
@@ -31,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class EventTemplateService implements ServiceLayer {
+public class EventTemplateService implements ServiceLayer<EventTemplate> {
 
     private final EventTemplateRepository repository;
     private final ClubRepository clubRepository;
@@ -50,19 +47,25 @@ public class EventTemplateService implements ServiceLayer {
 
         if (startTime.compareTo(clubOpeningHour) >= 0) {
             if (Duration.between(startTime, clubClosingHour).compareTo(duration) >= 0) return true;
-            if (clubClosingHour.compareTo(LocalTime.MAX) != 0) return false;return isEventTemplateBetweenOpeningHours(openingHoursMap, day.plus(1), LocalTime.MIDNIGHT, duration.minus(Duration.between(startTime, LocalTime.MAX)));
+            if (clubClosingHour.compareTo(LocalTime.MAX) != 0) return false;
+            return isEventTemplateBetweenOpeningHours(openingHoursMap, day.plus(1), LocalTime.MIDNIGHT, duration.minus(Duration.between(startTime, LocalTime.MAX)));
         }
 
         return false;
     }
 
     private boolean areEventTemplateDetailsValid(EventTemplate eventTemplate) {
-        if (clubRepository.findById(eventTemplate.getClubId()).isEmpty()) throw new ClubNotFoundException(eventTemplate.getClubId());
-        if (eventTemplate.getTitle() == null || eventTemplate.getTitle().length() == 0) throw new EventTitleFormatException(eventTemplate.getTitle());
-        if (coachRepository.findById(eventTemplate.getCoachId()).isEmpty())  throw new CoachNotFoundException(eventTemplate.getCoachId());
-        if (eventTemplate.getDuration().compareTo(Duration.ofHours(24)) > 0) throw new EventTemplateDurationException(eventTemplate.getTitle());
+        if (clubRepository.findById(eventTemplate.getClubId()).isEmpty())
+            throw new ClubNotFoundException(eventTemplate.getClubId());
+        if (eventTemplate.getTitle() == null || eventTemplate.getTitle().length() == 0)
+            throw new EventTitleFormatException(eventTemplate.getTitle());
+        if (coachRepository.findById(eventTemplate.getCoachId()).isEmpty())
+            throw new CoachNotFoundException(eventTemplate.getCoachId());
+        if (eventTemplate.getDuration().compareTo(Duration.ofHours(24)) > 0)
+            throw new EventTemplateDurationException(eventTemplate.getTitle());
         if (eventTemplate.getPeopleLimit() < 0) throw new PeopleLimitFormatException(eventTemplate.getPeopleLimit());
-        if (!isEventTemplateBetweenOpeningHours(clubRepository.findById(eventTemplate.getClubId()).get().getWhenOpen(), eventTemplate.getDay(), eventTemplate.time, eventTemplate.getDuration())) throw new EventTemplateTimeException(eventTemplate.getTitle());
+        if (!isEventTemplateBetweenOpeningHours(clubRepository.findById(eventTemplate.getClubId()).get().getWhenOpen(), eventTemplate.getDay(), eventTemplate.getStartTime(), eventTemplate.getDuration()))
+            throw new EventTemplateTimeException(eventTemplate.getTitle());
 
         return true;
     }
@@ -107,26 +110,26 @@ public class EventTemplateService implements ServiceLayer {
     }
 
     @Override
-    public ServiceEntity get(int id) {
+    public EventTemplate get(int id) {
         return repository.findById(id).orElseThrow(() -> new EventTemplateNotFoundException(id));
     }
 
     @Override
-    public ServiceEntity add(CreateRequest createRequest) {
-        if (!areEventTemplateDetailsValid(((EventTemplateCreateRequest)createRequest).asObject()))
+    public EventTemplate add(CreateRequest<EventTemplate> createRequest) {
+        if (!areEventTemplateDetailsValid(createRequest.asObject()))
             return null;
 
-        EventTemplate eventTemplate = ((EventTemplateCreateRequest)createRequest).asObject();
+        EventTemplate eventTemplate = createRequest.asObject();
         return repository.save(eventTemplate);
     }
 
     @Override
-    public ServiceEntity modify(int id, CreateRequest createRequest) {
+    public EventTemplate modify(int id, CreateRequest<EventTemplate> createRequest) {
         if (repository.findById(id).isEmpty()) throw new EventTemplateNotFoundException(id);
-        if (!areEventTemplateDetailsValid(((EventCreateRequest)createRequest).asObject()))
+        if (!areEventTemplateDetailsValid(createRequest.asObject()))
             return null;
 
-        EventTemplate modified = ((EventCreateRequest)createRequest).asObject();
+        EventTemplate modified = createRequest.asObject();
         return repository.save(modified);
     }
 

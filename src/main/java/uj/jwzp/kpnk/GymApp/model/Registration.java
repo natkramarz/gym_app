@@ -6,7 +6,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "registration")
 @SequenceGenerator(name = "default_gen", sequenceName = "registration_seq", allocationSize = 1)
-public class Registration extends DomainObject {
+public class Registration extends DomainObject implements ServiceEntity {
 
     @Column(nullable = false)
     private String name;
@@ -22,7 +22,7 @@ public class Registration extends DomainObject {
         this.eventId = eventId;
     }
 
-    public Registration(int eventId, String name, String surname) {
+    public Registration(String name, String surname, int eventId) {
         this.name = name;
         this.surname = surname;
         this.eventId = eventId;

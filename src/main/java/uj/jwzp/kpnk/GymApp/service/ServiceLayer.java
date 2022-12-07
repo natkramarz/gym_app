@@ -8,14 +8,14 @@ import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import java.util.List;
 import java.util.Set;
 
-public interface ServiceLayer {
-    public ServiceEntity get(int id);
+public interface ServiceLayer<T extends ServiceEntity > {
+    public T get(int id);
 
-    public List<? extends ServiceEntity> getAll();
+    public List<T> getAll();
 
-    public ServiceEntity add(CreateRequest createRequest);
+    public T add(CreateRequest<T> createRequest);
 
-    public ServiceEntity modify(int id, CreateRequest createRequest);
+    public T modify(int id, CreateRequest<T> createRequest);
 
     public void delete(int id);
 

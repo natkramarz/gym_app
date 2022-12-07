@@ -36,9 +36,10 @@ public class EventController {
     }
 
     @GetMapping
-    public List<? extends ServiceEntity> allEvents(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
+    public List<Event> allEvents(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
         if (clubId.isEmpty() && coachId.isEmpty()) return service.getAll().stream().toList();
-        if (clubId.isPresent()) return service.eventsByClub(clubId.get()).stream().toList();
+        if (clubId.isPresent())
+            return service.eventsByClub(clubId.get()).stream().toList();
         return service.eventsByCoach(coachId.get()).stream().toList();
     }
 
@@ -51,15 +52,16 @@ public class EventController {
     public ResponseEntity<?> getEvent(@PathVariable int id) {
         return ResponseEntity.ok(service.get(id));
     }
+
     @PostMapping
     public ResponseEntity<?> addEvent(@RequestBody EventCreateRequest request) {
-        Event createdEvent = service.add( request);
+        Event createdEvent = service.add(request);
         logger.info("Created event: {}", createdEvent);
         return ResponseEntity.created(URI.create("/api/events/" + createdEvent.getId())).body(createdEvent);
     }
 
     @PostMapping(params = {"template", "date"})
-    public ResponseEntity<?> createEventWithTemplate(@RequestParam("template") int templateId,  @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate eventDate) {
+    public ResponseEntity<?> createEventWithTemplate(@RequestParam("template") int templateId, @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate eventDate) {
         Event createdEvent = service.createEventWithTemplate(templateId, eventDate);
         logger.info("Created event: {}", createdEvent);
         return ResponseEntity.created(URI.create("/api/v1/events/" + createdEvent.getId())).body(createdEvent);
@@ -82,13 +84,13 @@ public class EventController {
 
     @DeleteMapping(path = "{id}")
     public ResponseEntity<?> cancelEvent(@PathVariable int id) {
-       service.delete(id);
-       return ResponseEntity.noContent().build();
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping(params = {"id", "date", "startTime"})
     public ResponseEntity<?> changeEventDate(@RequestParam("id") int id, @RequestParam("date") LocalDate date, @RequestParam("startTime") LocalTime startTime) {
         return ResponseEntity.ok(service.changeEventDate(id, date, startTime));
     }
-    
+
 }

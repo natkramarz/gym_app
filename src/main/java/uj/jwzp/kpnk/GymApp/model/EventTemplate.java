@@ -3,13 +3,14 @@ package uj.jwzp.kpnk.GymApp.model;
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
 @SequenceGenerator(name = "default_gen", sequenceName = "event_template_seq", allocationSize = 1)
-@Table(name="event_template")
-public class EventTemplate extends DomainObject {
+@Table(name = "event_template")
+public class EventTemplate extends DomainObject implements ServiceEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
@@ -138,5 +139,9 @@ public class EventTemplate extends DomainObject {
 
     public void setPeopleLimit(int peopleLimit) {
         this.peopleLimit = peopleLimit;
+    }
+
+    public Event toEvent(LocalDate eventDate) {
+        return new Event(title, eventDate, duration, startTime, clubId, coachId, peopleLimit);
     }
 }
