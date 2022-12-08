@@ -1,17 +1,20 @@
 package uj.jwzp.kpnk.GymApp.model;
 
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.util.Objects;
 
 
 @Entity
-@Table(name="coach")
+@Table(name = "coach")
 @SequenceGenerator(name = "default_gen", sequenceName = "coach_seq", allocationSize = 1)
-public class Coach extends DomainObject {
+public class Coach extends DomainObject implements ServiceEntity {
     @Column(nullable = false, length = 50)
     private String firstName;
-    @Column( nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String lastName;
 
     @Column(nullable = false)
@@ -33,28 +36,28 @@ public class Coach extends DomainObject {
         this.yearOfBirth = yearOfBirth;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setYearOfBirth(int yearOfBirth) {
-        this.yearOfBirth = yearOfBirth;
-    }
-
     public String getFirstName() {
         return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getLastName() {
         return lastName;
     }
 
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public int getYearOfBirth() {
         return yearOfBirth;
+    }
+
+    public void setYearOfBirth(int yearOfBirth) {
+        this.yearOfBirth = yearOfBirth;
     }
 
     @Override

@@ -3,13 +3,14 @@ package uj.jwzp.kpnk.GymApp.model;
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
 @SequenceGenerator(name = "default_gen", sequenceName = "event_template_seq", allocationSize = 1)
-@Table(name="event_template")
-public class EventTemplate extends DomainObject {
+@Table(name = "event_template")
+public class EventTemplate extends DomainObject implements ServiceEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
@@ -57,24 +58,48 @@ public class EventTemplate extends DomainObject {
         return title;
     }
 
+    private void setTitle(String title) {
+        this.title = title;
+    }
+
     public DayOfWeek getDay() {
         return day;
+    }
+
+    public void setDay(DayOfWeek day) {
+        this.day = day;
     }
 
     public LocalTime getStartTime() {
         return startTime;
     }
 
+    public void setStartTime(LocalTime time) {
+        this.startTime = time;
+    }
+
     public Duration getDuration() {
         return duration;
+    }
+
+    private void setDuration(Duration duration) {
+        this.duration = duration;
     }
 
     public int getClubId() {
         return clubId;
     }
 
+    private void setClubId(int clubId) {
+        this.clubId = clubId;
+    }
+
     public int getCoachId() {
         return coachId;
+    }
+
+    private void setCoachId(int coachId) {
+        this.coachId = coachId;
     }
 
     @Override
@@ -108,35 +133,15 @@ public class EventTemplate extends DomainObject {
                 "coachId=" + coachId + ']';
     }
 
-    private void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDay(DayOfWeek day) {
-        this.day = day;
-    }
-
-    public void setStartTime(LocalTime time) {
-        this.startTime = time;
-    }
-
-    private void setDuration(Duration duration) {
-        this.duration = duration;
-    }
-
-    private void setClubId(int clubId) {
-        this.clubId = clubId;
-    }
-
-    private void setCoachId(int coachId) {
-        this.coachId = coachId;
-    }
-
     public int getPeopleLimit() {
         return peopleLimit;
     }
 
     public void setPeopleLimit(int peopleLimit) {
         this.peopleLimit = peopleLimit;
+    }
+
+    public Event toEvent(LocalDate eventDate) {
+        return new Event(title, eventDate, duration, startTime, clubId, coachId, peopleLimit);
     }
 }

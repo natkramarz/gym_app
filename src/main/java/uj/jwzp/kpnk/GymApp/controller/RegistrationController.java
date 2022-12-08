@@ -8,7 +8,7 @@ import uj.jwzp.kpnk.GymApp.model.Registration;
 import uj.jwzp.kpnk.GymApp.service.RegistrationService;
 
 import java.net.URI;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/registrations")
@@ -23,29 +23,25 @@ public class RegistrationController {
 
 
     @GetMapping
-    public Set<Registration> getAllRegistrations() {
-        return service.allRegistrations();
+    public List<Registration> getAllRegistrations() {
+        return service.getAll();
     }
 
     @GetMapping(path = "{id}")
     public Registration getRegistration(@PathVariable int id) {
-        return service.registration(id);
+        return service.get(id);
     }
 
 
     @PostMapping
     public ResponseEntity<?> registerUserForEvent(@RequestBody RegistrationCreateRequest request) {
-        Registration createdRegistration = service.createRegistration(
-                request.eventId(),
-                request.name(),
-                request.surname()
-        );
+        Registration createdRegistration = service.add(request);
         return ResponseEntity.created(URI.create("/api/registrations/" + createdRegistration.getId())).body(createdRegistration);
     }
 
     @DeleteMapping
     public ResponseEntity<?> deleteRegistrationForEvent(@PathVariable int id) {
-        service.deleteRegistration(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 

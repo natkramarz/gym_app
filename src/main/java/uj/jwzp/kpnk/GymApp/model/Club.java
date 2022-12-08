@@ -1,16 +1,14 @@
 package uj.jwzp.kpnk.GymApp.model;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.util.Map;
 import java.util.Objects;
 
 @Entity
-@Table(name="club")
+@Table(name = "club")
 @SequenceGenerator(name = "default_gen", sequenceName = "club_seq", allocationSize = 1)
-public class Club extends DomainObject {
+public class Club extends DomainObject implements ServiceEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
@@ -55,12 +53,24 @@ public class Club extends DomainObject {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getAddress() {
         return address;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public Map<DayOfWeek, OpeningHours> getWhenOpen() {
         return whenOpen;
+    }
+
+    public void setWhenOpen(Map<DayOfWeek, OpeningHours> whenOpen) {
+        this.whenOpen = whenOpen;
     }
 
     @Override
@@ -70,17 +80,5 @@ public class Club extends DomainObject {
                 "name=" + name + ", " +
                 "address=" + address + ", " +
                 "whenOpen=" + whenOpen + ']';
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setWhenOpen(Map<DayOfWeek, OpeningHours> whenOpen) {
-        this.whenOpen = whenOpen;
     }
 }

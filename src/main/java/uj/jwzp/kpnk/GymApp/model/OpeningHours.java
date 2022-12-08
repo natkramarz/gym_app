@@ -1,6 +1,7 @@
 package uj.jwzp.kpnk.GymApp.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -25,8 +26,16 @@ public class OpeningHours {
         return from;
     }
 
+    public void setFrom(LocalTime from) {
+        this.from = from;
+    }
+
     public LocalTime getTo() {
         return to;
+    }
+
+    public void setTo(LocalTime to) {
+        this.to = to;
     }
 
     @Override
@@ -48,14 +57,6 @@ public class OpeningHours {
         return "OpeningHours[" +
                 "from=" + from + ", " +
                 "to=" + to + ']';
-    }
-
-    public void setFrom(LocalTime from) {
-        this.from = from;
-    }
-
-    public void setTo(LocalTime to) {
-        this.to = to;
     }
 
 }

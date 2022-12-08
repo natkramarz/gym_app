@@ -1,6 +1,8 @@
 package uj.jwzp.kpnk.GymApp.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -8,8 +10,8 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Table(name="event")
-public class Event extends EventTemplate {
+@Table(name = "event")
+public class Event extends EventTemplate implements ServiceEntity {
 
     @Column(columnDefinition = "DATE")
     LocalDate eventDate;
@@ -19,8 +21,8 @@ public class Event extends EventTemplate {
         this.eventDate = eventDate;
     }
 
-    public Event(String title, DayOfWeek day, LocalTime startTime, Duration duration, int clubId, int coachId, LocalDate eventDate, int peopleLimit) {
-        super(title, day, startTime, duration, clubId, coachId, peopleLimit);
+    public Event(String title, LocalDate eventDate, Duration duration, LocalTime startTime, int clubId, int coachId, int peopleLimit) {
+        super(title, eventDate.getDayOfWeek(), startTime, duration, clubId, coachId, peopleLimit);
         this.eventDate = eventDate;
     }
 

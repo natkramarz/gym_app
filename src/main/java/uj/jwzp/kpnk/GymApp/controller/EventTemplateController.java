@@ -28,9 +28,8 @@ public class EventTemplateController {
 
     @GetMapping
     public List<EventTemplate> allEventTemplates(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
-        if (clubId.isEmpty() && coachId.isEmpty()) return service.allEventTemplates().stream().toList();
-        if (clubId.isPresent()) return service.eventTemplatesByClub(clubId.get()).stream().toList();
-        return service.eventTemplatesByCoach(coachId.get()).stream().toList();
+        if (clubId.isEmpty() && coachId.isEmpty()) return service.getAll().stream().toList();
+        return clubId.map(integer -> service.eventTemplatesByClub(integer).stream().toList()).orElseGet(() -> service.eventTemplatesByCoach(coachId.get()).stream().toList());
     }
 
     @GetMapping(params = {"page", "size"})
@@ -40,35 +39,21 @@ public class EventTemplateController {
 
     @GetMapping("{id}")
     public ResponseEntity<?> getEventTemplate(@PathVariable int id) {
-        return ResponseEntity.ok(service.eventTemplate(id));
+        return ResponseEntity.ok(service.get(id));
     }
 
     @PostMapping
     public ResponseEntity<?> addEventTemplate(@RequestBody EventTemplateCreateRequest request) {
-        EventTemplate createdEventTemplate = service.createEventTemplate(
-                request.title(),
-                request.day(),
-                request.time(),
-                request.duration(),
-                request.clubId(),
-                request.coachId(),
-                request.peopleLimit()
-        );
+        var createdEventTemplate = service.createEventTemplate(request);
         logger.info("Created event: {}", createdEventTemplate);
         return ResponseEntity.created(URI.create("/api/v1/event_templates/" + createdEventTemplate.getId())).body(createdEventTemplate);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyEventTemplate(@PathVariable int id, @RequestBody EventTemplateCreateRequest request) {
-        var modifiedEventTemplate = service.modifyEventTemplate(
+        var modifiedEventTemplate = service.modify(
                 id,
-                request.title(),
-                request.day(),
-                request.time(),
-                request.duration(),
-                request.clubId(),
-                request.coachId(),
-                request.peopleLimit()
+                request
         );
         logger.info("Modified event template: {}", modifiedEventTemplate);
         return ResponseEntity.ok(modifiedEventTemplate);
@@ -76,6 +61,6 @@ public class EventTemplateController {
 
     @DeleteMapping(path = "{id}")
     public void removeEventTemplate(@PathVariable int id) {
-        service.deleteEventTemplate(id);
+        service.delete(id);
     }
 }

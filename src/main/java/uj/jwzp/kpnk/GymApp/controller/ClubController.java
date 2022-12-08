@@ -22,10 +22,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/v1/clubs")
 public class ClubController {
 
-    Logger logger = LoggerFactory.getLogger("jsonLogger");
-
     private final ClubService service;
     private final ClubRepresentationAssembler clubRepresentationAssembler;
+    Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
     public ClubController(ClubService service, ClubRepresentationAssembler clubRepresentationAssembler) {
@@ -35,12 +34,12 @@ public class ClubController {
 
     @GetMapping
     public CollectionModel<ClubRepresentation> allClubs() {
-        return clubRepresentationAssembler.toCollectionModel(service.allClubs().stream().toList());
+        return clubRepresentationAssembler.toCollectionModel(service.getAll().stream().toList());
     }
 
     @GetMapping(path = "{id}")
     public ClubRepresentation getClub(@PathVariable int id) {
-        Club club = service.club(id);
+        var club = service.get(id);
         return clubRepresentationAssembler.toModel(club)
                 .add(linkTo(methodOn(ClubController.class).allClubs()).withRel("clubs"));
     }
@@ -52,21 +51,21 @@ public class ClubController {
 
     @PostMapping
     public ResponseEntity<?> addClub(@RequestBody ClubCreateRequest request) {
-        var createdClub = service.addClub(request.name(), request.address(), request.whenOpen());
+        var createdClub = service.add(request);
         logger.info("Created club: {}", createdClub);
         return ResponseEntity.created(URI.create("/api/v1/clubs" + createdClub.getId())).body(createdClub);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyClub(@PathVariable int id, @RequestBody ClubCreateRequest request) {
-        var modifiedClub = service.modifyClub(id, request.name(), request.address(), request.whenOpen());
+        var modifiedClub = service.modify(id, request);
         logger.info("Modified club: {}", modifiedClub);
         return ResponseEntity.ok(modifiedClub);
     }
 
     @DeleteMapping(path = "{id}")
     public ResponseEntity<?> removeClub(@PathVariable int id) {
-        service.deleteClub(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

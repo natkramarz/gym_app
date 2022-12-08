@@ -1,20 +1,21 @@
 package uj.jwzp.kpnk.GymApp.service;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
-import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
+import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
+import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
-import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 
-import java.util.*;
+import java.util.List;
 
 @Service
-public class CoachService {
+public class CoachService implements ServiceLayer<Coach> {
 
     private final CoachRepository repository;
     private final EventTemplateService eventTemplateService;
@@ -27,26 +28,32 @@ public class CoachService {
         this.eventService = eventService;
     }
 
-    public Set<Coach> allCoaches() {
-        return new HashSet<>(repository.findAll());
+
+    @Override
+    public List<Coach> getAll() {
+        return repository.findAll();
     }
 
-    public Coach coach(int id) {
+    @Override
+    public Coach get(int id) {
         return repository.findById(id).orElseThrow(() -> new CoachNotFoundException(id));
     }
 
-    public Coach addCoach(String firstName, String lastName, int yearOfBirth) {
-        Coach coach = new Coach(firstName, lastName, yearOfBirth);
+    @Override
+    public Coach add(CreateRequest<Coach> createRequest) {
+        Coach coach = createRequest.asObject();
         return repository.save(coach);
     }
 
-    public Coach modifyCoach(int id, String firstName, String lastName, int yearOfBirth) {
+    @Override
+    public Coach modify(int id, CreateRequest<Coach> createRequest) {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
-        Coach modified = new Coach(id, firstName, lastName, yearOfBirth);
+        Coach modified = createRequest.asObject(id);
         return repository.save(modified);
     }
 
-    public void removeCoach(int id) {
+    @Override
+    public void delete(int id) {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
         if (!eventService.eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
         eventTemplateService.deleteEventTemplatesByCoach(id);
@@ -57,4 +64,6 @@ public class CoachService {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         return repository.findAll(paging);
     }
+
+
 }

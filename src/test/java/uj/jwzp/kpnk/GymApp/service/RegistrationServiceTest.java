@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uj.jwzp.kpnk.GymApp.controller.request.RegistrationCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.event.EventFullyBookedException;
 import uj.jwzp.kpnk.GymApp.model.Event;
 import uj.jwzp.kpnk.GymApp.model.Registration;
@@ -46,11 +47,11 @@ class RegistrationServiceTest {
     @Test
     void createRegistration_KeptLimit() {
         given(eventRepository.findById(2)).willReturn(Optional.of(event));
-        given(repository.findByEventId(2)).willReturn(List.of(new Registration(2, "Kate", "Tested")));
-        var registration = new Registration(2, "Hannah", "Test");
+        given(repository.findByEventId(2)).willReturn(List.of(new Registration("Kate", "Tested", 2)));
+        var registration = new Registration("Hannah", "Test", 2);
         given(repository.save(registration)).willReturn(registration);
 
-        var newRegistration = registrationService.createRegistration(2, "Hannah", "Test");
+        var newRegistration = registrationService.add(new RegistrationCreateRequest("Hannah", "Test", 2));
 
         Assertions.assertEquals(registration, newRegistration);
     }
@@ -59,12 +60,12 @@ class RegistrationServiceTest {
     void createRegistration_overPeopleLimit() {
         given(eventRepository.findById(2)).willReturn(Optional.of(event));
         given(repository.findByEventId(2)).willReturn(List.of(
-                new Registration(2, "Kate", "Tested"),
-                new Registration(2, "Suzie", "Test"),
-                new Registration(2, "Adam", "Test")
+                new Registration("Kate", "Tested", 2),
+                new Registration("Suzie", "Test", 2),
+                new Registration("Adam", "Test", 2)
                 ));
 
-        assertThatThrownBy(() -> registrationService.createRegistration(2, "Hannah", "Test"))
+        assertThatThrownBy(() -> registrationService.add(new RegistrationCreateRequest("Hannah", "Test", 2)))
                 .isInstanceOf(EventFullyBookedException.class)
                 .hasFieldOrPropertyWithValue("message", "Registration limit reached for the event with id:" + 2);
     }
