@@ -2,7 +2,6 @@ package uj.jwzp.kpnk.GymApp.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.Duration;
