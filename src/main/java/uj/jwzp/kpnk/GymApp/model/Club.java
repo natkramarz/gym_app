@@ -1,21 +1,14 @@
 package uj.jwzp.kpnk.GymApp.model;
 
-import org.springframework.hateoas.RepresentationModel;
-import uj.jwzp.kpnk.GymApp.controller.request.ClubCreateRequest;
-
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.util.Map;
 import java.util.Objects;
 
 @Entity
-@Table(name="club")
-public class Club extends RepresentationModel<Club> implements ServiceEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false)
-    private int id;
+@Table(name = "club")
+@SequenceGenerator(name = "default_gen", sequenceName = "club_seq", allocationSize = 1)
+public class Club extends DomainObject implements ServiceEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
@@ -31,7 +24,7 @@ public class Club extends RepresentationModel<Club> implements ServiceEntity {
     }
 
     public Club(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
-        this.id = id;
+        super(id);
         this.name = name;
         this.address = address;
         this.whenOpen = whenOpen;
@@ -48,52 +41,44 @@ public class Club extends RepresentationModel<Club> implements ServiceEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Club club = (Club) o;
-        return id == club.id;
+        return this.getId() == club.getId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    public int getId() {
-        return id;
+        return Objects.hash(this.getId());
     }
 
     public String getName() {
         return name;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public Map<DayOfWeek, OpeningHours> getWhenOpen() {
-        return whenOpen;
-    }
-
-    @Override
-    public String toString() {
-        return "Club[" +
-                "id=" + id + ", " +
-                "name=" + name + ", " +
-                "address=" + address + ", " +
-                "whenOpen=" + whenOpen + ']';
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
     }
 
+    public Map<DayOfWeek, OpeningHours> getWhenOpen() {
+        return whenOpen;
+    }
+
     public void setWhenOpen(Map<DayOfWeek, OpeningHours> whenOpen) {
         this.whenOpen = whenOpen;
+    }
+
+    @Override
+    public String toString() {
+        return "Club[" +
+                "id=" + this.getId() + ", " +
+                "name=" + name + ", " +
+                "address=" + address + ", " +
+                "whenOpen=" + whenOpen + ']';
     }
 }

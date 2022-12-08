@@ -3,7 +3,6 @@ package uj.jwzp.kpnk.GymApp.controller.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -17,7 +16,7 @@ public record EventTemplateCreateRequest(
         int clubId,
         int coachId,
         int peopleLimit
-    ) implements CreateRequest {
+) implements CreateRequest<EventTemplate> {
 
     @Override
     public EventTemplate asObject() {

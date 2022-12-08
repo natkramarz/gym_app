@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.service.CoachService;
 
 import java.net.URI;
@@ -18,9 +17,8 @@ import java.util.List;
 @RequestMapping("/api/v1/coaches")
 public class CoachController {
 
-    Logger logger = LoggerFactory.getLogger("jsonLogger");
-
     private final CoachService service;
+    Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
     public CoachController(CoachService service) {
@@ -28,7 +26,7 @@ public class CoachController {
     }
 
     @GetMapping
-    public List<? extends ServiceEntity> allCoaches() {
+    public List<Coach> allCoaches() {
         return service.getAll().stream().toList();
     }
 
@@ -44,7 +42,7 @@ public class CoachController {
 
     @PostMapping()
     public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
-        Coach createdCoach = service.add(request);
+        var createdCoach = service.add(request);
         logger.info("Created coach: {}", createdCoach);
         return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);
     }

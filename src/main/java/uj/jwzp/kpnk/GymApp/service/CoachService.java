@@ -1,23 +1,21 @@
 package uj.jwzp.kpnk.GymApp.service;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
-import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
+import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
-import uj.jwzp.kpnk.GymApp.repository.EventRepository;
 
-import java.util.*;
+import java.util.List;
 
 @Service
-public class CoachService implements ServiceLayer {
+public class CoachService implements ServiceLayer<Coach> {
 
     private final CoachRepository repository;
     private final EventTemplateService eventTemplateService;
@@ -42,15 +40,15 @@ public class CoachService implements ServiceLayer {
     }
 
     @Override
-    public Coach add(CreateRequest createRequest) {
-        Coach coach = (Coach) createRequest.asObject();
+    public Coach add(CreateRequest<Coach> createRequest) {
+        Coach coach = createRequest.asObject();
         return repository.save(coach);
     }
 
     @Override
-    public Coach modify(int id, CreateRequest createRequest) {
+    public Coach modify(int id, CreateRequest<Coach> createRequest) {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
-        Coach modified = (Coach)createRequest.asObject(id);
+        Coach modified = createRequest.asObject(id);
         return repository.save(modified);
     }
 

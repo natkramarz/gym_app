@@ -6,21 +6,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
-import uj.jwzp.kpnk.GymApp.controller.request.ClubCreateRequest;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubHasEventException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class ClubService implements ServiceLayer {
+public class ClubService implements ServiceLayer<Club> {
 
     private final ClubRepository repository;
     private final EventTemplateService eventTemplateService;
@@ -44,27 +43,27 @@ public class ClubService implements ServiceLayer {
     }
 
     @Override
-    public Club add(CreateRequest createRequest) {
-        Club club = (Club) createRequest.asObject();
+    public Club add(CreateRequest<Club> createRequest) {
+        Club club = createRequest.asObject();
         return repository.save(club);
     }
 
     @Override
-    public Club modify(int id, CreateRequest createRequest) {
+    public Club modify(int id, CreateRequest<Club> createRequest) {
 
         Optional<Club> clubOptional = repository.findById(id);
         if (clubOptional.isEmpty()) throw new ClubNotFoundException(id);
 
         eventService.eventsByClub(id)
                 .forEach(event -> {
-                    if (!eventService.isEventBetweenOpeningHours(((ClubCreateRequest) createRequest).whenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) {
+                    if (!eventService.isEventBetweenOpeningHours(createRequest.asObject().getWhenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) {
                         throw new ClubOpeningHoursException(id);
                     }
                 });
 
         deleteEventTemplatesByClub(clubOptional.get());
 
-        Club modified = (Club) createRequest.asObject(id);
+        Club modified = createRequest.asObject(id);
         return repository.save(modified);
     }
 

@@ -1,6 +1,8 @@
 package uj.jwzp.kpnk.GymApp.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -8,7 +10,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Table(name="event")
+@Table(name = "event")
 public class Event extends EventTemplate implements ServiceEntity {
 
     @Column(columnDefinition = "DATE")

@@ -1,16 +1,15 @@
 package uj.jwzp.kpnk.GymApp.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
 @Table(name = "registration")
-public class Registration implements ServiceEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false)
-    private int id;
+@SequenceGenerator(name = "default_gen", sequenceName = "registration_seq", allocationSize = 1)
+public class Registration extends DomainObject implements ServiceEntity {
 
     @Column(nullable = false)
     private String name;
@@ -20,7 +19,7 @@ public class Registration implements ServiceEntity {
     private int eventId;
 
     public Registration(int id, String name, String surname, int eventId) {
-        this.id = id;
+        super(id);
         this.name = name;
         this.surname = surname;
         this.eventId = eventId;
@@ -33,14 +32,6 @@ public class Registration implements ServiceEntity {
     }
 
     public Registration() {
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -72,18 +63,18 @@ public class Registration implements ServiceEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Registration that = (Registration) o;
-        return id == that.id && eventId == that.eventId && name.equals(that.name) && surname.equals(that.surname);
+        return this.getId() == that.getId() && eventId == that.eventId && name.equals(that.name) && surname.equals(that.surname);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, surname, eventId);
+        return Objects.hash(this.getId(), name, surname, eventId);
     }
 
     @Override
     public String toString() {
         return "Registration{" +
-                "id=" + id +
+                "id=" + this.getId() +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", eventId=" + eventId +

@@ -1,21 +1,20 @@
 package uj.jwzp.kpnk.GymApp.model;
 
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.util.Objects;
 
 
 @Entity
-@Table(name="coach")
-public class Coach implements ServiceEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false)
-    private int id;
-
+@Table(name = "coach")
+@SequenceGenerator(name = "default_gen", sequenceName = "coach_seq", allocationSize = 1)
+public class Coach extends DomainObject implements ServiceEntity {
     @Column(nullable = false, length = 50)
     private String firstName;
-    @Column( nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String lastName;
 
     @Column(nullable = false)
@@ -25,7 +24,7 @@ public class Coach implements ServiceEntity {
     }
 
     public Coach(int id, String firstName, String lastName, int yearOfBirth) {
-        this.id = id;
+        super(id);
         this.firstName = firstName;
         this.lastName = lastName;
         this.yearOfBirth = yearOfBirth;
@@ -37,36 +36,28 @@ public class Coach implements ServiceEntity {
         this.yearOfBirth = yearOfBirth;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getFirstName() {
+        return firstName;
     }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setYearOfBirth(int yearOfBirth) {
-        this.yearOfBirth = yearOfBirth;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
     public String getLastName() {
         return lastName;
     }
 
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public int getYearOfBirth() {
         return yearOfBirth;
+    }
+
+    public void setYearOfBirth(int yearOfBirth) {
+        this.yearOfBirth = yearOfBirth;
     }
 
     @Override
@@ -74,7 +65,7 @@ public class Coach implements ServiceEntity {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (Coach) obj;
-        return this.id == that.id &&
+        return this.getId() == that.getId() &&
                 Objects.equals(this.firstName, that.firstName) &&
                 Objects.equals(this.lastName, that.lastName) &&
                 this.yearOfBirth == that.yearOfBirth;
@@ -82,13 +73,13 @@ public class Coach implements ServiceEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, yearOfBirth);
+        return Objects.hash(this.getId(), firstName, lastName, yearOfBirth);
     }
 
     @Override
     public String toString() {
         return "Coach[" +
-                "id=" + id + ", " +
+                "id=" + this.getId() + ", " +
                 "firstName=" + firstName + ", " +
                 "lastName=" + lastName + ", " +
                 "yearOfBirth=" + yearOfBirth + ']';

@@ -1,7 +1,5 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
@@ -30,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class EventService implements ServiceLayer {
+public class EventService implements ServiceLayer<Event> {
 
     private final EventRepository repository;
     private final ClubRepository clubRepository;
@@ -64,7 +61,7 @@ public class EventService implements ServiceLayer {
     private boolean isCoachBooked(int coachId, LocalDate date, LocalTime startTime, Duration duration) {
         var endTime = startTime.plus(duration);
         return repository.findByCoachIdAndEventDate(coachId, date).stream()
-                .anyMatch(event ->  {
+                .anyMatch(event -> {
                     var start = event.getStartTime();
                     var end = event.getStartTime().plus(event.getDuration());
                     return (start.isAfter(startTime) && start.isBefore(endTime)) ||
@@ -74,16 +71,21 @@ public class EventService implements ServiceLayer {
 
     private boolean areEventDetailsValid(Event event) {
         Optional<Club> clubOptional = clubRepository.findById(event.getClubId());
-        if (event.getTitle() == null || event.getTitle().length() == 0) throw new EventTitleFormatException(event.getTitle());
+        if (event.getTitle() == null || event.getTitle().length() == 0)
+            throw new EventTitleFormatException(event.getTitle());
         if (clubOptional.isEmpty()) throw new ClubNotFoundException(event.getClubId());
         Club club = clubOptional.get();
-        if (event.getDay() != event.getEventDate().getDayOfWeek()) throw new EventTemplateDayOfWeekMismatchException(event.getDay(), event.getEventDate().getDayOfWeek());
-        if (coachRepository.findById(event.getCoachId()).isEmpty())  throw new CoachNotFoundException(event.getCoachId());
+        if (event.getDay() != event.getEventDate().getDayOfWeek())
+            throw new EventTemplateDayOfWeekMismatchException(event.getDay(), event.getEventDate().getDayOfWeek());
+        if (coachRepository.findById(event.getCoachId()).isEmpty())
+            throw new CoachNotFoundException(event.getCoachId());
         if (event.getPeopleLimit() < 0) throw new PeopleLimitFormatException(event.getPeopleLimit());
         if (event.getEventDate().isBefore(LocalDate.now())) throw new EventPastDateException(event.getEventDate());
         if (event.getDuration().compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException();
-        if (isCoachBooked(event.getCoachId(), event.getEventDate(), event.getStartTime(), event.getDuration())) throw new CoachAlreadyBookedException(event.getCoachId());
-        if (!isEventBetweenOpeningHours(club.getWhenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) throw new EventTimeException(event.getClubId());
+        if (isCoachBooked(event.getCoachId(), event.getEventDate(), event.getStartTime(), event.getDuration()))
+            throw new CoachAlreadyBookedException(event.getCoachId());
+        if (!isEventBetweenOpeningHours(club.getWhenOpen(), event.getDay(), event.getStartTime(), event.getDuration()))
+            throw new EventTimeException(event.getClubId());
 
         return true;
     }
@@ -94,16 +96,16 @@ public class EventService implements ServiceLayer {
     }
 
     @Override
-    public ServiceEntity get(int id) {
+    public Event get(int id) {
         return repository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 
     @Override
-    public Event add(CreateRequest request) {
-        if (!areEventDetailsValid(((EventCreateRequest) request).asObject()))
+    public Event add(CreateRequest<Event> request) {
+        if (!areEventDetailsValid(request.asObject()))
             return null;
 
-        Event event = ((EventCreateRequest)request).asObject();
+        Event event = request.asObject();
         return repository.save(event);
 
     }
@@ -111,8 +113,10 @@ public class EventService implements ServiceLayer {
     public Event createEventWithTemplate(int templateId, LocalDate eventDate) {
         EventTemplate template = eventTemplateRepository.findById(templateId).orElseThrow(() -> new EventTemplateNotFoundException(templateId));
         if (eventDate.isBefore(LocalDate.now())) throw new EventPastDateException(eventDate);
-        if (template.getDay() != eventDate.getDayOfWeek()) throw new EventTemplateDayOfWeekMismatchException(template.getDay(), eventDate.getDayOfWeek());
-        if (isCoachBooked(template.getCoachId(), eventDate, template.getStartTime(), template.getDuration())) throw new CoachAlreadyBookedException(template.getCoachId());
+        if (template.getDay() != eventDate.getDayOfWeek())
+            throw new EventTemplateDayOfWeekMismatchException(template.getDay(), eventDate.getDayOfWeek());
+        if (isCoachBooked(template.getCoachId(), eventDate, template.getStartTime(), template.getDuration()))
+            throw new CoachAlreadyBookedException(template.getCoachId());
         Event event = template.toEvent(eventDate);
         return repository.save(event);
     }
@@ -136,10 +140,11 @@ public class EventService implements ServiceLayer {
 
 
     @Override
-    public Event modify(int id, CreateRequest request){
-        if (!areEventDetailsValid(((EventCreateRequest) request).asObject())) return null;
+    public Event modify(int id, CreateRequest<Event> request) {
+        if (!areEventDetailsValid(request.asObject()))
+            return null;
 
-        Event modified = ((EventCreateRequest)request).asObject(id);
+        Event modified = request.asObject(id);
         return repository.save(modified);
     }
 
@@ -163,7 +168,8 @@ public class EventService implements ServiceLayer {
         Event event = repository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
         if (date.isBefore(LocalDate.now())) throw new EventPastDateException(date);
         Club club = clubRepository.findById(event.getClubId()).orElseThrow(() -> new ClubNotFoundException(event.getClubId()));
-        if (!isEventBetweenOpeningHours(club.getWhenOpen(), date.getDayOfWeek(), time, event.getDuration())) throw new EventTimeException(event.getClubId());
+        if (!isEventBetweenOpeningHours(club.getWhenOpen(), date.getDayOfWeek(), time, event.getDuration()))
+            throw new EventTimeException(event.getClubId());
         event.setEventDate(date);
         event.setStartTime(time);
         return repository.save(event);
