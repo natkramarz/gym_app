@@ -1,7 +1,6 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundExcepti
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.*;
-import uj.jwzp.kpnk.GymApp.service.ServiceProxy.*;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -78,7 +76,7 @@ public class EventService implements ServiceLayer<Event> {
         Club club = clubOptional.get();
         if (event.getDay() != event.getEventDate().getDayOfWeek())
             throw new EventTemplateDayOfWeekMismatchException(event.getDay(), event.getEventDate().getDayOfWeek());
-        if (coachService.get(event.getCoachId()) == null)
+        if (coachRepository.findById(event.getCoachId()).isEmpty())
             throw new CoachNotFoundException(event.getCoachId());
         if (event.getPeopleLimit() < 0) throw new PeopleLimitFormatException(event.getPeopleLimit());
         if (event.getEventDate().isBefore(LocalDate.now())) throw new EventPastDateException(event.getEventDate());
@@ -134,7 +132,7 @@ public class EventService implements ServiceLayer<Event> {
     }
 
     public Set<Event> eventsByDateAndClubId(LocalDate date, int clubId) {
-        if (clubService.get(clubId) == null) throw new ClubNotFoundException(clubId);
+        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
 
         return repository.findByClubIdAndEventDate(clubId, date);
     }
