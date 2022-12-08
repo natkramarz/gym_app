@@ -3,7 +3,7 @@ package uj.jwzp.kpnk.GymApp.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
+import uj.jwzp.kpnk.GymApp.exception.gym_bro.GymBroNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.GymBro;
 import uj.jwzp.kpnk.GymApp.model.special_case.DeletedGymBro;
 import uj.jwzp.kpnk.GymApp.repository.GymBroRepository;
@@ -39,14 +39,14 @@ public class GymBroService implements ServiceLayer<GymBro> {
 
     @Override
     public GymBro modify(int id, CreateRequest<GymBro> createRequest) {
-        if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
+        if (repository.findById(id).isEmpty()) throw new GymBroNotFoundException(id);
         var modified = createRequest.asObject(id);
         return repository.save(modified);
     }
 
     @Override
     public void delete(int id) {
-        if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
+        if (repository.findById(id).isEmpty()) throw new GymBroNotFoundException(id);
         var deleted = removePersonalData(id);
         repository.save(deleted);
     }
