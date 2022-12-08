@@ -21,11 +21,7 @@ jar {
 	enabled = false
 }
 
-flyway {
-	user = System.getenv('DATABASE_CONNECTION_USER')
-	password = System.getenv('DATABASE_CONNECTION_PASSWORD')
-	url = System.getenv('DATABASE_CONNECTION_URL')
-}
+
 
 dependencies {
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.8'
@@ -35,16 +31,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'com.h2database:h2:2.1.214'
-	implementation 'ch.qos.logback:logback-classic:1.2.11'
-	implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
-	implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+	runtimeOnly 'com.h2database:h2:'
+	implementation 'org.flywaydb:flyway-core'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
-
-apply plugin: 'org.flywaydb.flyway'
