@@ -8,7 +8,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "club")
 @SequenceGenerator(name = "default_gen", sequenceName = "club_seq", allocationSize = 1)
-public class Club extends DomainObject implements ServiceEntity {
+public class Club extends DomainObject {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;

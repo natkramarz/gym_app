@@ -46,8 +46,8 @@ public class EventService implements ServiceLayer<Event> {
 
     public boolean isEventBetweenOpeningHours(Map<DayOfWeek, OpeningHours> openingHoursMap, DayOfWeek day, LocalTime startTime, Duration duration) {
         if (openingHoursMap.get(day) == null) return false;
-        LocalTime clubOpeningHour = openingHoursMap.get(day).getFrom();
-        LocalTime clubClosingHour = openingHoursMap.get(day).getTo();
+        var clubOpeningHour = openingHoursMap.get(day).getFrom();
+        var clubClosingHour = openingHoursMap.get(day).getTo();
 
         if (startTime.compareTo(clubOpeningHour) >= 0) {
             if (Duration.between(startTime, clubClosingHour).compareTo(duration) >= 0) return true;
@@ -70,11 +70,11 @@ public class EventService implements ServiceLayer<Event> {
     }
 
     private boolean areEventDetailsValid(Event event) {
-        Optional<Club> clubOptional = clubRepository.findById(event.getClubId());
+        var clubOptional = clubRepository.findById(event.getClubId());
         if (event.getTitle() == null || event.getTitle().length() == 0)
             throw new EventTitleFormatException(event.getTitle());
         if (clubOptional.isEmpty()) throw new ClubNotFoundException(event.getClubId());
-        Club club = clubOptional.get();
+        var club = clubOptional.get();
         if (event.getDay() != event.getEventDate().getDayOfWeek())
             throw new EventTemplateDayOfWeekMismatchException(event.getDay(), event.getEventDate().getDayOfWeek());
         if (coachRepository.findById(event.getCoachId()).isEmpty())
@@ -105,19 +105,19 @@ public class EventService implements ServiceLayer<Event> {
         if (!areEventDetailsValid(request.asObject()))
             return null;
 
-        Event event = request.asObject();
+        var event = request.asObject();
         return repository.save(event);
 
     }
 
     public Event createEventWithTemplate(int templateId, LocalDate eventDate) {
-        EventTemplate template = eventTemplateRepository.findById(templateId).orElseThrow(() -> new EventTemplateNotFoundException(templateId));
+        var template = eventTemplateRepository.findById(templateId).orElseThrow(() -> new EventTemplateNotFoundException(templateId));
         if (eventDate.isBefore(LocalDate.now())) throw new EventPastDateException(eventDate);
         if (template.getDay() != eventDate.getDayOfWeek())
             throw new EventTemplateDayOfWeekMismatchException(template.getDay(), eventDate.getDayOfWeek());
         if (isCoachBooked(template.getCoachId(), eventDate, template.getStartTime(), template.getDuration()))
             throw new CoachAlreadyBookedException(template.getCoachId());
-        Event event = template.toEvent(eventDate);
+        var event = template.toEvent(eventDate);
         return repository.save(event);
     }
 
@@ -144,7 +144,7 @@ public class EventService implements ServiceLayer<Event> {
         if (!areEventDetailsValid(request.asObject()))
             return null;
 
-        Event modified = request.asObject(id);
+        var modified = request.asObject(id);
         return repository.save(modified);
     }
 
@@ -165,7 +165,7 @@ public class EventService implements ServiceLayer<Event> {
 
 
     public Event changeEventDate(int eventId, LocalDate date, LocalTime time) {
-        Event event = repository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        var event = repository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
         if (date.isBefore(LocalDate.now())) throw new EventPastDateException(date);
         Club club = clubRepository.findById(event.getClubId()).orElseThrow(() -> new ClubNotFoundException(event.getClubId()));
         if (!isEventBetweenOpeningHours(club.getWhenOpen(), date.getDayOfWeek(), time, event.getDuration()))
@@ -180,8 +180,8 @@ public class EventService implements ServiceLayer<Event> {
     }
 
     public void addEvents(int numOfDays) {
-        List<EventTemplate> eventTemplates = eventTemplateRepository.findByDay(DayOfWeek.from(LocalDate.now()));
-        List<Event> createdEvents = eventTemplates.stream()
+        var eventTemplates = eventTemplateRepository.findByDay(DayOfWeek.from(LocalDate.now()));
+        var createdEvents = eventTemplates.stream()
                 .map(eventTemplate -> new Event(eventTemplate, LocalDate.now().plusDays(numOfDays)))
                 .filter(this::areEventDetailsValid)
                 .toList();

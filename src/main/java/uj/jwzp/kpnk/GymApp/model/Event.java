@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "event")
-public class Event extends EventTemplate implements ServiceEntity {
+public class Event extends EventTemplate {
 
     @Column(columnDefinition = "DATE")
     LocalDate eventDate;

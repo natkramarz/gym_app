@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "coach")
 @SequenceGenerator(name = "default_gen", sequenceName = "coach_seq", allocationSize = 1)
-public class Coach extends DomainObject implements ServiceEntity {
+public class Coach extends DomainObject {
     @Column(nullable = false, length = 50)
     private String firstName;
     @Column(nullable = false, length = 50)

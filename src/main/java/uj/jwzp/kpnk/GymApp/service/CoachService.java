@@ -41,14 +41,14 @@ public class CoachService implements ServiceLayer<Coach> {
 
     @Override
     public Coach add(CreateRequest<Coach> createRequest) {
-        Coach coach = createRequest.asObject();
+        var coach = createRequest.asObject();
         return repository.save(coach);
     }
 
     @Override
     public Coach modify(int id, CreateRequest<Coach> createRequest) {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
-        Coach modified = createRequest.asObject(id);
+        var modified = createRequest.asObject(id);
         return repository.save(modified);
     }
 
@@ -61,7 +61,7 @@ public class CoachService implements ServiceLayer<Coach> {
     }
 
     public Page<Coach> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        var paging = PageRequest.of(pageNumber, pageSize);
         return repository.findAll(paging);
     }
 

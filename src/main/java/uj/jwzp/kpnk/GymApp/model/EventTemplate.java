@@ -10,7 +10,7 @@ import java.util.Objects;
 @Entity
 @SequenceGenerator(name = "default_gen", sequenceName = "event_template_seq", allocationSize = 1)
 @Table(name = "event_template")
-public class EventTemplate extends DomainObject implements ServiceEntity {
+public class EventTemplate extends DomainObject {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
