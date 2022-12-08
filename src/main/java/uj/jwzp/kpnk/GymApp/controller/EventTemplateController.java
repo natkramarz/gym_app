@@ -29,8 +29,7 @@ public class EventTemplateController {
     @GetMapping
     public List<EventTemplate> allEventTemplates(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
         if (clubId.isEmpty() && coachId.isEmpty()) return service.getAll().stream().toList();
-        if (clubId.isPresent()) return service.eventTemplatesByClub(clubId.get()).stream().toList();
-        return service.eventTemplatesByCoach(coachId.get()).stream().toList();
+        return clubId.map(integer -> service.eventTemplatesByClub(integer).stream().toList()).orElseGet(() -> service.eventTemplatesByCoach(coachId.get()).stream().toList());
     }
 
     @GetMapping(params = {"page", "size"})

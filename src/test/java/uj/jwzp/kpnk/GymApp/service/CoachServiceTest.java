@@ -12,7 +12,6 @@ import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.model.Event;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 
 import java.util.List;

@@ -30,9 +30,12 @@ public class EventController {
 
     @GetMapping
     public List<Event> allEvents(@RequestParam Optional<Integer> clubId, @RequestParam Optional<Integer> coachId) {
-        if (clubId.isEmpty() && coachId.isEmpty()) return service.getAll().stream().toList();
-        if (clubId.isPresent())
+        if (clubId.isEmpty() && coachId.isEmpty()) {
+            return service.getAll().stream().toList();
+        }
+        if (clubId.isPresent()) {
             return service.eventsByClub(clubId.get()).stream().toList();
+        }
         return service.eventsByCoach(coachId.get()).stream().toList();
     }
 
