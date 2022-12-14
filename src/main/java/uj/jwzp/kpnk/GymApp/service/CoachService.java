@@ -1,6 +1,7 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ public class CoachService implements ServiceLayer<Coach> {
     private final EventService eventService;
 
     @Autowired
-    public CoachService(CoachRepository repository, EventTemplateService eventTemplateService, EventService eventService) {
+    public CoachService(CoachRepository repository, EventTemplateService eventTemplateService, @Lazy EventService eventService) {
         this.repository = repository;
         this.eventTemplateService = eventTemplateService;
         this.eventService = eventService;

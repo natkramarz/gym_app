@@ -1,6 +1,7 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,16 +31,16 @@ import java.util.stream.Collectors;
 public class EventService implements ServiceLayer<Event> {
 
     private final EventRepository repository;
-    private final ClubRepository clubRepository;
-    private final CoachRepository coachRepository;
+    private final ClubService clubService;
+    private final CoachService coachService;
     private final EventTemplateRepository eventTemplateRepository;
     private final RegistrationRepository registrationRepository;
 
     @Autowired
-    public EventService(EventRepository repository, ClubRepository clubRepository, CoachRepository coachRepository, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
+    public EventService(EventRepository repository, @Lazy ClubService clubService, @Lazy CoachService coachService, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
         this.repository = repository;
-        this.clubRepository = clubRepository;
-        this.coachRepository = coachRepository;
+        this.clubService = clubService;
+        this.coachService = coachService;
         this.eventTemplateRepository = eventTemplateRepository;
         this.registrationRepository = registrationRepository;
     }
@@ -70,14 +71,14 @@ public class EventService implements ServiceLayer<Event> {
     }
 
     private boolean areEventDetailsValid(Event event) {
-        Optional<Club> clubOptional = clubRepository.findById(event.getClubId());
+        Optional<Club> clubOptional = Optional.ofNullable(clubService.get(event.getClubId()));
         if (event.getTitle() == null || event.getTitle().length() == 0)
             throw new EventTitleFormatException(event.getTitle());
         if (clubOptional.isEmpty()) throw new ClubNotFoundException(event.getClubId());
         Club club = clubOptional.get();
         if (event.getDay() != event.getEventDate().getDayOfWeek())
             throw new EventTemplateDayOfWeekMismatchException(event.getDay(), event.getEventDate().getDayOfWeek());
-        if (coachRepository.findById(event.getCoachId()).isEmpty())
+        if (coachService.get(event.getCoachId()) == null)
             throw new CoachNotFoundException(event.getCoachId());
         if (event.getPeopleLimit() < 0) throw new PeopleLimitFormatException(event.getPeopleLimit());
         if (event.getEventDate().isBefore(LocalDate.now())) throw new EventPastDateException(event.getEventDate());
@@ -123,7 +124,7 @@ public class EventService implements ServiceLayer<Event> {
 
 
     public Set<Event> eventsByClub(int clubId) {
-        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
+        if (clubService.get(clubId) == null) throw new ClubNotFoundException(clubId);
 
         return repository.findByClubId(clubId);
     }
@@ -133,7 +134,7 @@ public class EventService implements ServiceLayer<Event> {
     }
 
     public Set<Event> eventsByDateAndClubId(LocalDate date, int clubId) {
-        if (clubRepository.findById(clubId).isEmpty()) throw new ClubNotFoundException(clubId);
+        if (clubService.get(clubId) == null) throw new ClubNotFoundException(clubId);
 
         return repository.findByClubIdAndEventDate(clubId, date);
     }
@@ -167,7 +168,8 @@ public class EventService implements ServiceLayer<Event> {
     public Event changeEventDate(int eventId, LocalDate date, LocalTime time) {
         Event event = repository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
         if (date.isBefore(LocalDate.now())) throw new EventPastDateException(date);
-        Club club = clubRepository.findById(event.getClubId()).orElseThrow(() -> new ClubNotFoundException(event.getClubId()));
+        Club club = clubService.get(event.getClubId());
+        if (club == null) throw new ClubNotFoundException(event.getClubId());
         if (!isEventBetweenOpeningHours(club.getWhenOpen(), date.getDayOfWeek(), time, event.getDuration()))
             throw new EventTimeException(event.getClubId());
         event.setEventDate(date);
