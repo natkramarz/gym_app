@@ -1,6 +1,7 @@
 package uj.jwzp.kpnk.GymApp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
@@ -14,8 +15,14 @@ import java.util.List;
 
 @Service
 public class ServiceProxy {
-    private abstract static class ServiceProxyImp<T extends ServiceEntity, T2 extends ServiceLayer<T>> implements ServiceLayer<T> {
+    private abstract class ServiceProxyImp<T extends ServiceEntity, T2 extends ServiceLayer<T>> implements ServiceLayer<T> {
         protected T2 service;
+        protected final ApplicationContext context;
+
+        @Autowired
+        ServiceProxyImp(ApplicationContext context) {
+            this.context = context;
+        }
 
         public abstract T2 getService();
 
@@ -47,21 +54,16 @@ public class ServiceProxy {
 
     @Service
     public class CoachServiceProxyImp extends ServiceProxyImp<Coach, CoachService> {
-        private final CoachRepository repository;
-        private final EventTemplateService eventTemplateService;
-        private final EventServiceProxyImp eventService;
 
         @Autowired
-        public CoachServiceProxyImp(CoachRepository coachRepository, EventTemplateService eventTemplateService, @Lazy EventServiceProxyImp eventService) {
-            this.repository = coachRepository;
-            this.eventTemplateService = eventTemplateService;
-            this.eventService = eventService;
+        public CoachServiceProxyImp(ApplicationContext context) {
+            super(context);
         }
 
         @Override
         public CoachService getService() {
             if (service == null) {
-                service = new CoachService(repository, eventTemplateService, eventService);
+                service = new CoachService(context);
             }
             return service;
         }
@@ -70,21 +72,16 @@ public class ServiceProxy {
 
     @Service
     public class ClubServiceProxyImp extends ServiceProxyImp<Club, ClubService> {
-        private final ClubRepository repository;
-        private final EventTemplateService eventTemplateService;
-        private final EventServiceProxyImp eventService;
 
         @Autowired
-        public ClubServiceProxyImp(ClubRepository repository, EventTemplateService eventTemplateService, @Lazy EventServiceProxyImp eventService) {
-            this.repository = repository;
-            this.eventTemplateService = eventTemplateService;
-            this.eventService = eventService;
+        public ClubServiceProxyImp(ApplicationContext context) {
+            super(context);
         }
 
         @Override
         public ClubService getService() {
             if (service == null) {
-                service = new ClubService(repository, eventTemplateService, eventService);
+                service = new ClubService(context);
             }
             return service;
         }
@@ -94,25 +91,16 @@ public class ServiceProxy {
     @Lazy
     @Service
     public class EventServiceProxyImp extends ServiceProxyImp<Event, EventService> {
-        private final EventRepository repository;
-        private final ClubServiceProxyImp clubService;
-        private final CoachServiceProxyImp coachService;
-        private final EventTemplateRepository eventTemplateRepository;
-        private final RegistrationRepository registrationRepository;
 
         @Autowired
-        public EventServiceProxyImp(EventRepository repository, ClubServiceProxyImp clubService, CoachServiceProxyImp coachService, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
-            this.repository = repository;
-            this.clubService = clubService;
-            this.coachService = coachService;
-            this.eventTemplateRepository = eventTemplateRepository;
-            this.registrationRepository = registrationRepository;
+        public EventServiceProxyImp(ApplicationContext context) {
+            super(context);
         }
 
         @Override
         public EventService getService() {
             if (service == null) {
-                service = new EventService(repository, clubService, coachService, eventTemplateRepository, registrationRepository);
+                service = new EventService(context);
             }
             return service;
         }

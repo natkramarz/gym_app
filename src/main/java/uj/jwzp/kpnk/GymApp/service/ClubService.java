@@ -1,5 +1,6 @@
 package uj.jwzp.kpnk.GymApp.service;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +27,10 @@ public class ClubService implements ServiceLayer<Club> {
     private final EventServiceProxyImp eventService;
 
 
-    public ClubService(ClubRepository repository, EventTemplateService eventTemplateService,EventServiceProxyImp eventService) {
-        this.repository = repository;
-        this.eventTemplateService = eventTemplateService;
-        this.eventService = eventService;
+    public ClubService(ApplicationContext context) {
+        repository = context.getBean(ClubRepository.class);
+        eventTemplateService = context.getBean(EventTemplateService.class);
+        eventService = context.getBean(EventServiceProxyImp.class);
     }
 
     @Override

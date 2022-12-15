@@ -1,5 +1,7 @@
 package uj.jwzp.kpnk.GymApp.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,12 +37,12 @@ public class EventService implements ServiceLayer<Event> {
     private final EventTemplateRepository eventTemplateRepository;
     private final RegistrationRepository registrationRepository;
 
-    public EventService(EventRepository repository, ClubServiceProxyImp clubService, CoachServiceProxyImp coachService, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
-        this.repository = repository;
-        this.clubService = clubService;
-        this.coachService = coachService;
-        this.eventTemplateRepository = eventTemplateRepository;
-        this.registrationRepository = registrationRepository;
+    public EventService(ApplicationContext context) {
+        this.repository = context.getBean(EventRepository.class);
+        this.clubService = context.getBean(ClubServiceProxyImp.class);
+        this.coachService = context.getBean(CoachServiceProxyImp.class);
+        this.eventTemplateRepository = context.getBean(EventTemplateRepository.class);
+        this.registrationRepository = context.getBean(RegistrationRepository.class);
     }
 
     public boolean isEventBetweenOpeningHours(Map<DayOfWeek, OpeningHours> openingHoursMap, DayOfWeek day, LocalTime startTime, Duration duration) {
