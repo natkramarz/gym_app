@@ -1,7 +1,5 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +12,7 @@ import uj.jwzp.kpnk.GymApp.exception.club.ClubOpeningHoursException;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.EventTemplate;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.EventServiceProxyImp;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +23,10 @@ public class ClubService implements ServiceLayer<Club> {
 
     private final ClubRepository repository;
     private final EventTemplateService eventTemplateService;
-    private final EventService eventService;
+    private final EventServiceProxyImp eventService;
 
-    @Autowired
-    public ClubService(ClubRepository repository, @Lazy EventTemplateService eventTemplateService, @Lazy EventService eventService) {
+
+    public ClubService(ClubRepository repository, EventTemplateService eventTemplateService,EventServiceProxyImp eventService) {
         this.repository = repository;
         this.eventTemplateService = eventTemplateService;
         this.eventService = eventService;
@@ -55,9 +54,9 @@ public class ClubService implements ServiceLayer<Club> {
         Optional<Club> clubOptional = repository.findById(id);
         if (clubOptional.isEmpty()) throw new ClubNotFoundException(id);
 
-        eventService.eventsByClub(id)
+        eventService.getService().eventsByClub(id)
                 .forEach(event -> {
-                    if (!eventService.isEventBetweenOpeningHours(createRequest.asObject().getWhenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) {
+                    if (!eventService.getService().isEventBetweenOpeningHours(createRequest.asObject().getWhenOpen(), event.getDay(), event.getStartTime(), event.getDuration())) {
                         throw new ClubOpeningHoursException(id);
                     }
                 });
@@ -82,7 +81,7 @@ public class ClubService implements ServiceLayer<Club> {
     public void delete(int id) {
         Optional<Club> clubRequest = repository.findById(id);
         if (clubRequest.isEmpty()) throw new ClubNotFoundException(id);
-        if (!eventService.eventsByClub(id).isEmpty()) throw new ClubHasEventException(id);
+        if (!eventService.getService().eventsByClub(id).isEmpty()) throw new ClubHasEventException(id);
         deleteEventTemplatesByClub(clubRequest.get());
         repository.deleteById(id);
     }

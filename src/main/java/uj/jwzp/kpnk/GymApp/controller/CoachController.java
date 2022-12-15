@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.service.CoachService;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.CoachServiceProxyImp;
 
 import java.net.URI;
 import java.util.List;
@@ -17,11 +17,11 @@ import java.util.List;
 @RequestMapping("/api/v1/coaches")
 public class CoachController {
 
-    private final CoachService service;
+    private final CoachServiceProxyImp service;
     Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
-    public CoachController(CoachService service) {
+    public CoachController(CoachServiceProxyImp service) {
         this.service = service;
     }
 
@@ -37,7 +37,7 @@ public class CoachController {
 
     @GetMapping(params = {"page", "size"})
     public Page<Coach> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return service.findPaginated(pageNumber, pageSize);
+        return service.getService().findPaginated(pageNumber, pageSize);
     }
 
     @PostMapping()

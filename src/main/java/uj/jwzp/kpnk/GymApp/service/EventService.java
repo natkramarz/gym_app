@@ -1,7 +1,5 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +14,7 @@ import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundExcepti
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.*;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.*;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -31,13 +30,12 @@ import java.util.stream.Collectors;
 public class EventService implements ServiceLayer<Event> {
 
     private final EventRepository repository;
-    private final ClubService clubService;
-    private final CoachService coachService;
+    private final ClubServiceProxyImp clubService;
+    private final CoachServiceProxyImp coachService;
     private final EventTemplateRepository eventTemplateRepository;
     private final RegistrationRepository registrationRepository;
 
-    @Autowired
-    public EventService(EventRepository repository, @Lazy ClubService clubService, @Lazy CoachService coachService, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
+    public EventService(EventRepository repository, ClubServiceProxyImp clubService, CoachServiceProxyImp coachService, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
         this.repository = repository;
         this.clubService = clubService;
         this.coachService = coachService;

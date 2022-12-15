@@ -11,7 +11,7 @@ import uj.jwzp.kpnk.GymApp.controller.request.ClubCreateRequest;
 import uj.jwzp.kpnk.GymApp.dto.ClubRepresentation;
 import uj.jwzp.kpnk.GymApp.dto.assembler.ClubRepresentationAssembler;
 import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.service.ClubService;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.ClubServiceProxyImp;
 
 import java.net.URI;
 
@@ -22,12 +22,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/v1/clubs")
 public class ClubController {
 
-    private final ClubService service;
+    private final ClubServiceProxyImp service;
     private final ClubRepresentationAssembler clubRepresentationAssembler;
     Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
-    public ClubController(ClubService service, ClubRepresentationAssembler clubRepresentationAssembler) {
+    public ClubController(ClubServiceProxyImp service, ClubRepresentationAssembler clubRepresentationAssembler) {
         this.service = service;
         this.clubRepresentationAssembler = clubRepresentationAssembler;
     }
@@ -46,7 +46,7 @@ public class ClubController {
 
     @GetMapping(params = {"page", "size"})
     public Page<Club> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return service.findPaginated(pageNumber, pageSize);
+        return service.getService().findPaginated(pageNumber, pageSize);
     }
 
     @PostMapping
