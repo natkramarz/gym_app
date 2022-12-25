@@ -31,6 +31,10 @@ public class GymBroService implements ServiceLayer<GymBro> {
         return repository.findAll();
     }
 
+    public List<GymBro> getAllByIds(List<Integer> ids) {
+        return repository.findAllById(ids);
+    }
+
     @Override
     public GymBro add(CreateRequest<GymBro> createRequest) {
         var gymBro = createRequest.asObject();
@@ -47,11 +51,7 @@ public class GymBroService implements ServiceLayer<GymBro> {
     @Override
     public void delete(int id) {
         if (repository.findById(id).isEmpty()) throw new GymBroNotFoundException(id);
-        var deleted = removePersonalData(id);
-        repository.save(deleted);
-    }
-
-    public DeletedGymBro removePersonalData(int id) {
-        return new DeletedGymBro(id);
+        var deleted = new DeletedGymBro(id);
+        repository.save(new GymBro(id, deleted.getFirstName(), deleted.getLastName(), deleted.getAccountCreatedAt(), deleted.isDeleted()));
     }
 }

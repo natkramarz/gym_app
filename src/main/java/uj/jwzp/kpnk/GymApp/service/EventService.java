@@ -33,15 +33,15 @@ public class EventService implements ServiceLayer<Event> {
     private final ClubRepository clubRepository;
     private final CoachRepository coachRepository;
     private final EventTemplateRepository eventTemplateRepository;
-    private final RegistrationRepository registrationRepository;
+    private final GymBroService gymBroService;
 
     @Autowired
-    public EventService(EventRepository repository, ClubRepository clubRepository, CoachRepository coachRepository, EventTemplateRepository eventTemplateRepository, RegistrationRepository registrationRepository) {
+    public EventService(EventRepository repository, ClubRepository clubRepository, CoachRepository coachRepository, EventTemplateRepository eventTemplateRepository, GymBroService gymBroService) {
         this.repository = repository;
         this.clubRepository = clubRepository;
         this.coachRepository = coachRepository;
         this.eventTemplateRepository = eventTemplateRepository;
-        this.registrationRepository = registrationRepository;
+        this.gymBroService = gymBroService;
     }
 
     public boolean isEventBetweenOpeningHours(Map<DayOfWeek, OpeningHours> openingHoursMap, DayOfWeek day, LocalTime startTime, Duration duration) {
@@ -104,10 +104,9 @@ public class EventService implements ServiceLayer<Event> {
     public Event add(CreateRequest<Event> request) {
         if (!areEventDetailsValid(request.asObject()))
             return null;
-
+        System.out.println("*" + request.asObject().getStartTime());
         var event = request.asObject();
         return repository.save(event);
-
     }
 
     public Event createEventWithTemplate(int templateId, LocalDate eventDate) {
@@ -151,10 +150,11 @@ public class EventService implements ServiceLayer<Event> {
     @Override
     public void delete(int id) {
         if (repository.findById(id).isEmpty()) throw new EventNotFoundException(id);
-        List<Integer> eventRegistrations = registrationRepository.findByEventId(id).stream()
-                .map(Registration::getId)
-                .collect(Collectors.toList());
-        registrationRepository.deleteAllByIdInBatch(eventRegistrations);
+        // TODO: registration when event is cancelled
+//        List<Integer> eventRegistrations = registrationRepository.findByEventId(id).stream()
+//                .map(Registration::getId)
+//                .collect(Collectors.toList());
+//        registrationRepository.deleteAllByIdInBatch(eventRegistrations);
         repository.deleteById(id);
     }
 
@@ -187,6 +187,5 @@ public class EventService implements ServiceLayer<Event> {
                 .toList();
         repository.saveAll(createdEvents);
     }
-
 
 }

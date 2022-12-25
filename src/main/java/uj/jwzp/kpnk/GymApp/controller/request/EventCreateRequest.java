@@ -11,7 +11,7 @@ import java.time.LocalTime;
 public record EventCreateRequest(
         String title,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy") LocalDate eventDate,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm") LocalTime startTime,
+        LocalTime startTime,
         @JsonDeserialize(using = EventDurationDeserializer.class) Duration duration,
         int clubId,
         int coachId,
