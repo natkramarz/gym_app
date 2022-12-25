@@ -11,18 +11,18 @@ import java.util.Objects;
 @SequenceGenerator(name = "default_gen", sequenceName = "registration_seq", allocationSize = 1)
 public class Registration extends DomainObject {
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "gym_bro_id")
     private int gymBroId;
-    @Column(nullable = false)
+    @Column(nullable = false, name="event_id")
     private int eventId;
 
-    public Registration(int id, int gymBroId, int eventId) {
+    public Registration(int id, int eventId, int gymBroId) {
         super(id);
         this.gymBroId = gymBroId;
         this.eventId = eventId;
     }
 
-    public Registration(int gymBroId, int eventId) {
+    public Registration(int eventId, int gymBroId) {
         this.gymBroId = gymBroId;
         this.eventId = eventId;
     }
@@ -55,7 +55,7 @@ public class Registration extends DomainObject {
     public String toString() {
         return "Registration{" +
                 "id=" + this.getId() +
-                ", gym bro id='" + gymBroId + '\'' +
+                ", gymBroId=" + gymBroId +
                 ", eventId=" + eventId +
                 '}';
     }

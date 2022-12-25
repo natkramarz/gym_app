@@ -3,59 +3,52 @@ package uj.jwzp.kpnk.GymApp.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uj.jwzp.kpnk.GymApp.controller.request.CoachCreateRequest;
-import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.service.ServiceProxy.CoachServiceProxyImp;
+import uj.jwzp.kpnk.GymApp.controller.request.GymBroCreateRequest;
+import uj.jwzp.kpnk.GymApp.model.GymBro;
+import uj.jwzp.kpnk.GymApp.service.GymBroService;
 
 import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/coaches")
-public class CoachController {
-
-    private final CoachServiceProxyImp service;
+@RequestMapping("/api/v1/gym_bros")
+public class GymBroController {
+    private final GymBroService service;
     Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
-    public CoachController(CoachServiceProxyImp service) {
+    public GymBroController(GymBroService service) {
         this.service = service;
     }
 
     @GetMapping
-    public List<Coach> allCoaches() {
+    public List<GymBro> allCoaches() {
         return service.getAll().stream().toList();
     }
 
     @GetMapping(path = "{id}")
-    public Coach getCoach(@PathVariable int id) {
+    public GymBro getGymBro(@PathVariable int id) {
         return service.get(id);
     }
 
-    @GetMapping(params = {"page", "size"})
-    public Page<Coach> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return service.getService().findPaginated(pageNumber, pageSize);
-    }
-
     @PostMapping()
-    public ResponseEntity<?> addCoach(@RequestBody CoachCreateRequest request) {
+    public ResponseEntity<?> addGymBro(@RequestBody GymBroCreateRequest request) {
         var createdCoach = service.add(request);
         logger.info("Created coach: {}", createdCoach);
         return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);
     }
 
     @PutMapping(path = "{id}")
-    public ResponseEntity<?> modifyCoach(@PathVariable int id, @RequestBody CoachCreateRequest request) {
+    public ResponseEntity<?> modifyGymBro(@PathVariable int id, @RequestBody GymBroCreateRequest request) {
         var modifiedCoach = service.modify(id, request);
         logger.info("Modified coach: {}", modifiedCoach);
         return ResponseEntity.ok(modifiedCoach);
     }
 
     @DeleteMapping(path = "{id}")
-    public ResponseEntity<?> removeCoach(@PathVariable int id) {
+    public ResponseEntity<?> deleteGymBro(@PathVariable int id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

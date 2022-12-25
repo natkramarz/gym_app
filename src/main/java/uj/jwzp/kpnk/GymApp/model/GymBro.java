@@ -1,15 +1,14 @@
 package uj.jwzp.kpnk.GymApp.model;
 
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import org.hibernate.annotations.SQLDelete;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-@SequenceGenerator(name = "default_gen", sequenceName = "event_template_seq", allocationSize = 1)
+@SequenceGenerator(name = "default_gen", sequenceName = "gym_bro_seq", allocationSize = 1)
+@SQLDelete(sql = "UPDATE gym_bro SET deleted = true WHERE id=?")
 @Table(name = "gym_bro")
 public class GymBro extends DomainObject {
 
@@ -20,8 +19,18 @@ public class GymBro extends DomainObject {
     @Column(columnDefinition = "DATE")
     LocalDate accountCreatedAt;
 
-    public GymBro(int id, String firstName, String lastName, LocalDate accountCreatedAt) {
+    private boolean deleted = Boolean.FALSE;
+
+    public GymBro(int id, String firstName, String lastName, LocalDate accountCreatedAt, boolean deleted) {
         super(id);
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.accountCreatedAt = accountCreatedAt;
+        this.deleted = deleted;
+    }
+
+    public GymBro(String firstName, String lastName, LocalDate accountCreatedAt) {
+        super();
         this.firstName = firstName;
         this.lastName = lastName;
         this.accountCreatedAt = accountCreatedAt;
@@ -66,5 +75,23 @@ public class GymBro extends DomainObject {
     @Override
     public int hashCode() {
         return Objects.hash(firstName, lastName, accountCreatedAt);
+    }
+
+    @Override
+    public String toString() {
+        return "GymBro{" +
+                super.getId() +
+                " firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", accountCreatedAt=" + accountCreatedAt +
+                '}';
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
