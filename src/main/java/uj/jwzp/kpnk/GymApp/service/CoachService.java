@@ -1,6 +1,6 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +11,7 @@ import uj.jwzp.kpnk.GymApp.exception.coach.AssignedEventsException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.model.Coach;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.EventServiceProxyImp;
 
 import java.util.List;
 
@@ -19,13 +20,12 @@ public class CoachService implements ServiceLayer<Coach> {
 
     private final CoachRepository repository;
     private final EventTemplateService eventTemplateService;
-    private final EventService eventService;
+    private final EventServiceProxyImp eventService;
 
-    @Autowired
-    public CoachService(CoachRepository repository, EventTemplateService eventTemplateService, EventService eventService) {
-        this.repository = repository;
-        this.eventTemplateService = eventTemplateService;
-        this.eventService = eventService;
+    public CoachService(ApplicationContext context) {
+        repository = context.getBean(CoachRepository.class);
+        eventTemplateService = context.getBean(EventTemplateService.class);
+        eventService = context.getBean(EventServiceProxyImp.class);
     }
 
 
@@ -55,7 +55,7 @@ public class CoachService implements ServiceLayer<Coach> {
     @Override
     public void delete(int id) {
         if (repository.findById(id).isEmpty()) throw new CoachNotFoundException(id);
-        if (!eventService.eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
+        if (!eventService.getService().eventsByCoach(id).isEmpty()) throw new AssignedEventsException(id);
         eventTemplateService.deleteEventTemplatesByCoach(id);
         repository.deleteById(id);
     }

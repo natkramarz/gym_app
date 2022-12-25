@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uj.jwzp.kpnk.GymApp.controller.request.EventCreateRequest;
 import uj.jwzp.kpnk.GymApp.model.Event;
-import uj.jwzp.kpnk.GymApp.service.EventService;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.EventServiceProxyImp;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -20,11 +20,11 @@ import java.util.Optional;
 @RequestMapping("/api/v1/events")
 public class EventController {
 
-    private final EventService service;
+    private final EventServiceProxyImp service;
     Logger logger = LoggerFactory.getLogger("jsonLogger");
 
     @Autowired
-    public EventController(EventService service) {
+    public EventController(EventServiceProxyImp service) {
         this.service = service;
     }
 
@@ -34,14 +34,14 @@ public class EventController {
             return service.getAll().stream().toList();
         }
         if (clubId.isPresent()) {
-            return service.eventsByClub(clubId.get()).stream().toList();
+            return service.getService().eventsByClub(clubId.get()).stream().toList();
         }
-        return service.eventsByCoach(coachId.get()).stream().toList();
+        return service.getService().eventsByCoach(coachId.get()).stream().toList();
     }
 
     @GetMapping(params = {"page", "size"})
     public ResponseEntity<?> findPaginated(@RequestParam("page") int pageNumber, @RequestParam("size") int pageSize) {
-        return ResponseEntity.ok(service.findPaginated(pageNumber, pageSize));
+        return ResponseEntity.ok(service.getService().findPaginated(pageNumber, pageSize));
     }
 
     @GetMapping("{id}")
@@ -58,7 +58,7 @@ public class EventController {
 
     @PostMapping(params = {"template", "date"})
     public ResponseEntity<?> createEventWithTemplate(@RequestParam("template") int templateId, @RequestParam("date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate eventDate) {
-        var createdEvent = service.createEventWithTemplate(templateId, eventDate);
+        var createdEvent = service.getService().createEventWithTemplate(templateId, eventDate);
         logger.info("Created event: {}", createdEvent);
         return ResponseEntity.created(URI.create("/api/v1/events/" + createdEvent.getId())).body(createdEvent);
     }
@@ -75,7 +75,7 @@ public class EventController {
 
     @GetMapping(params = {"date", "club_id"})
     public ResponseEntity<?> findByDateAndClubId(@RequestParam("date") LocalDate date, @RequestParam("club_id") int clubId) {
-        return ResponseEntity.ok(service.eventsByDateAndClubId(date, clubId));
+        return ResponseEntity.ok(service.getService().eventsByDateAndClubId(date, clubId));
     }
 
     @DeleteMapping(path = "{id}")
@@ -86,7 +86,7 @@ public class EventController {
 
     @PatchMapping(params = {"id", "date", "startTime"})
     public ResponseEntity<?> changeEventDate(@RequestParam("id") int id, @RequestParam("date") LocalDate date, @RequestParam("startTime") LocalTime startTime) {
-        return ResponseEntity.ok(service.changeEventDate(id, date, startTime));
+        return ResponseEntity.ok(service.getService().changeEventDate(id, date, startTime));
     }
 
 }
