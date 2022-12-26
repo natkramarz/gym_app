@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
-import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.*;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
