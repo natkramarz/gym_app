@@ -1,0 +1,103 @@
+### All events
+GET {{host}}/api/v1/events
+Accept: application/json
+
+> {%
+    client.test("Get all events", function() {
+        client.assert(response.status == 200)
+    });
+%}
+
+### Add an event
+POST {{host}}/api/v1/events
+Content-Type: application/json
+
+{
+  "title": "event testowy",
+  "eventDate": "27-12-2022",
+  "startTime": "15:00:00",
+  "duration": "01:30",
+  "clubId": 3,
+  "coachId": 2,
+  "peopleLimit": 10
+}
+
+> {%  client.test("Create an event", function() {
+        client.assert(response.status == 201)
+    });
+    client.global.set("new_event_id", response.body.id);
+%}
+
+### Create an event using template
+< {%
+    request.variables.set("templateId", "1")
+    request.variables.set("date", "01-31-2023")
+%}
+POST {{host}}/api/v1/events?template={{templateId}}&date={{date}}
+
+> {%  client.test("Create an event using template", function() {
+        client.assert(response.status == 201)
+    })%}
+
+### Modify an event
+< {%
+    request.variables.set("id", "1")
+%}
+PUT {{host}}/api/v1/events/{{new_event_id}}
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "modified event",
+  "day": "TUESDAY",
+  "startTime": "13:00",
+  "duration": "1:30",
+  "clubId": 1,
+  "coachId": 1,
+  "peopleLimit": 10,
+  "eventDate": "05-07-2022"
+}
+
+> {%
+    client.test("Modify an event", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### All events with paging
+< {%
+    request.variables.set("page", "0");
+    request.variables.set("size", "3");
+%}
+GET {{host}}/api/v1/events?page={{page}}&size={{size}}
+
+> {%
+    client.test("Get all coaches", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Delete existing event
+< {%
+    request.variables.set("id", "8")
+%}
+DELETE {{host}}/api/v1/coaches/{{new_event_id}}
+Content-Type: application/json
+
+> {%
+    client.test("Delete an event", function() {
+        client.assert(response.status == 204)
+    })
+%}
+
+### Get participants list of event
+< {%
+    request.variables.set("id", "1")
+ %}
+GET {{host}}/api/registrations/participants?id={{id}}
+
+> {%
+    client.test("Get participants list of event", function() {
+        client.assert(response.status == 200)
+    })
+%}

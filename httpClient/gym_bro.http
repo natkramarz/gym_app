@@ -1,0 +1,58 @@
+### All gym bros
+GET {{host}}/api/v1/gym_bros
+Accept: application/json
+
+> {%
+    client.test("Get all gym bros", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Add a gym bro
+POST {{host}}/api/v1/gym_bros
+Content-Type: application/json
+
+{
+  "firstName": "Kirsten",
+  "lastName": "Williamson",
+  "accountCreatedAt": "15-12-2022"
+}
+
+> {%
+    client.test("Add a gym bro", function() {
+        client.assert(response.status == 201)
+    })
+    client.global.set("new_gym_bro_id", response.body.id);
+%}
+
+### Modify a gym bro
+< {%
+    request.variables.set("id", "1")
+%}
+PUT {{host}}/api/v1/gym_bros/{{new_gym_bro_id}}
+Content-Type: application/json
+
+{
+  "firstName": "Kristine",
+  "lastName": "Bro",
+  "yearOfBirth": 1998
+}
+
+> {%
+    client.test("Modify a gym bro", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Delete existing gym bro
+< {%
+    request.variables.set("id", "1")
+%}
+DELETE {{host}}/api/v1/gym_bros/{{new_gym_bro_id}}
+Content-Type: application/json
+
+> {%
+    client.test("Delete a gym bro", function() {
+        client.assert(response.status == 204)
+    })
+%}

@@ -1,0 +1,72 @@
+### All coaches
+GET {{host}}/api/v1/coaches
+Accept: application/json
+
+> {%
+client.test("Get all coaches", function() {
+    client.assert(response.status == 200)
+})
+ %}
+
+
+### All coaches with paging
+< {%
+    request.variables.set("page", "0")
+    request.variables.set("size", "3")
+%}
+GET {{host}}/api/v1/coaches?page={{page}}&size={{size}}
+
+> {%
+    client.test("Get all coaches", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Add a coach
+POST {{host}}/api/v1/coaches
+Content-Type: application/json
+
+{
+    "firstName": "Paulina",
+    "lastName": "The Coach",
+    "yearOfBirth": 1998
+}
+
+> {%
+client.test("Add a coach", function() {
+    client.assert(response.status == 201)
+})
+client.global.set("new_coach_id", response.body.id);
+%}
+
+### Modify a coach
+< {%
+request.variables.set("id", "1")
+%}
+PUT {{host}}/api/v1/coaches/{{new_coach_id}}
+Content-Type: application/json
+
+{
+    "firstName": "Caroline",
+    "lastName": "The Coach",
+    "yearOfBirth": 1998
+}
+
+> {%
+    client.test("Modify a coach", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Delete existing coach
+< {%
+    request.variables.set("id", "1")
+%}
+DELETE {{host}}/api/v1/coaches/{{new_coach_id}}
+Content-Type: application/json
+
+> {%
+    client.test("Delete a coach", function() {
+        client.assert(response.status == 204)
+    })
+%}
