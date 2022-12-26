@@ -1,6 +1,6 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.gym_bro.GymBroNotFoundException;
@@ -15,11 +15,10 @@ public class GymBroService implements ServiceLayer<GymBro> {
 
     private final GymBroRepository repository;
 
-    @Autowired
-    public GymBroService(GymBroRepository gymBroRepository) {
-        this.repository = gymBroRepository;
-    }
 
+    public GymBroService(ApplicationContext context) {
+        repository = context.getBean(GymBroRepository.class);
+    }
 
     @Override
     public GymBro get(int id) {

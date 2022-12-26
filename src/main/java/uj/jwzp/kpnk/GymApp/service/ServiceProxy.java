@@ -5,17 +5,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.model.Event;
-import uj.jwzp.kpnk.GymApp.model.ServiceEntity;
-import uj.jwzp.kpnk.GymApp.repository.*;
+import uj.jwzp.kpnk.GymApp.model.*;
 
 import java.util.List;
 
 @Service
 public class ServiceProxy {
-    private abstract class ServiceProxyImp<T extends ServiceEntity, T2 extends ServiceLayer<T>> implements ServiceLayer<T> {
+    private abstract class ServiceProxyImp<T extends DomainObject, T2 extends ServiceLayer<T>> implements ServiceLayer<T> {
         protected T2 service;
         protected final ApplicationContext context;
 
@@ -101,6 +97,25 @@ public class ServiceProxy {
         public EventService getService() {
             if (service == null) {
                 service = new EventService(context);
+            }
+            return service;
+        }
+
+    }
+
+    @Lazy
+    @Service
+    public class GymBroServiceProxyImp extends ServiceProxyImp<GymBro, GymBroService> {
+
+        @Autowired
+        public GymBroServiceProxyImp(ApplicationContext context) {
+            super(context);
+        }
+
+        @Override
+        public GymBroService getService() {
+            if (service == null) {
+                service = new GymBroService(context);
             }
             return service;
         }

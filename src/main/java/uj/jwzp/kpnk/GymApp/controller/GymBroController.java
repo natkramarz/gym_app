@@ -24,7 +24,7 @@ public class GymBroController {
     }
 
     @GetMapping
-    public List<GymBro> allCoaches() {
+    public List<GymBro> allGymBros() {
         return service.getAll().stream().toList();
     }
 
@@ -36,14 +36,14 @@ public class GymBroController {
     @PostMapping()
     public ResponseEntity<?> addGymBro(@RequestBody GymBroCreateRequest request) {
         var createdCoach = service.add(request);
-        logger.info("Created coach: {}", createdCoach);
+        logger.info("Created gym bro: {}", createdCoach);
         return ResponseEntity.created(URI.create("/api/v1/coaches/" + createdCoach.getId())).body(createdCoach);
     }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> modifyGymBro(@PathVariable int id, @RequestBody GymBroCreateRequest request) {
         var modifiedCoach = service.modify(id, request);
-        logger.info("Modified coach: {}", modifiedCoach);
+        logger.info("Modified gym bro: {}", modifiedCoach);
         return ResponseEntity.ok(modifiedCoach);
     }
 
