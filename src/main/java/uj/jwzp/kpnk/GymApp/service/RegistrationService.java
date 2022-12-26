@@ -2,29 +2,28 @@ package uj.jwzp.kpnk.GymApp.service;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
-import uj.jwzp.kpnk.GymApp.exception.event.EventFullyBookedException;
-import uj.jwzp.kpnk.GymApp.exception.event.EventNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.registration.RegistrationNotFound;
-import uj.jwzp.kpnk.GymApp.model.Event;
+import uj.jwzp.kpnk.GymApp.model.GymBro;
 import uj.jwzp.kpnk.GymApp.model.Registration;
-import uj.jwzp.kpnk.GymApp.repository.EventRepository;
+import uj.jwzp.kpnk.GymApp.model.special_case.DeletedGymBro;
 import uj.jwzp.kpnk.GymApp.repository.RegistrationRepository;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RegistrationService implements ServiceLayer<Registration> {
 
     private final RegistrationRepository repository;
-    private final EventRepository eventRepository;
+    private final ServiceProxy.EventServiceProxyImp eventService;
+    private final ServiceProxy.GymBroServiceProxyImp gymBroService;
 
     @Autowired
-    public RegistrationService(RegistrationRepository repository, EventRepository eventRepository) {
-        this.repository = repository;
-        this.eventRepository = eventRepository;
+    public RegistrationService(ApplicationContext context) {
+        this.repository = context.getBean(RegistrationRepository.class);
+        this.eventService = context.getBean(ServiceProxy.EventServiceProxyImp.class);
+        this.gymBroService = context.getBean(ServiceProxy.GymBroServiceProxyImp.class);
     }
 
     @Override
@@ -37,15 +36,18 @@ public class RegistrationService implements ServiceLayer<Registration> {
         return repository.findAll();
     }
 
+    public List<Registration> getAllByEventId(int eventId) {
+        return repository.findByEventId(eventId);
+    }
+
     @Override
     public Registration add(CreateRequest<Registration> createRequest) {
         int eventId = createRequest.asObject().getEventId();
-        Optional<Event> eventOptional = eventRepository.findById(eventId);
-        if (eventOptional.isEmpty()) throw new EventNotFoundException(eventId);
-        Event event = eventOptional.get();
-        if (repository.findByEventId(eventId).size() >= event.getPeopleLimit())
-            throw new EventFullyBookedException(eventId);
-        Registration registration = createRequest.asObject();
+        var event = eventService.get(eventId);
+        int gymBroId = createRequest.asObject().getGymBroId();
+        var gymBro = gymBroService.get(gymBroId);
+        var registration = createRequest.asObject();
+
         return repository.save(registration);
     }
 
@@ -56,7 +58,14 @@ public class RegistrationService implements ServiceLayer<Registration> {
 
     @Override
     public void delete(int id) {
-        if (eventRepository.findById(id).isEmpty()) throw new EventNotFoundException(id);
+        eventService.get(id);
         repository.deleteById(id);
+    }
+
+    public List<GymBro> eventParticipants(int eventId) {
+        var gymBroIds = repository.findByEventId(eventId).stream()
+                .map(Registration::getGymBroId)
+                .toList();
+        return gymBroService.getService().getAllByIds(gymBroIds).stream().map(gymBro -> !gymBro.isDeleted() ? gymBro : new DeletedGymBro(gymBro.getId())).toList();
     }
 }

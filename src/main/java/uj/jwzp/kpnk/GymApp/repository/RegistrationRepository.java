@@ -11,4 +11,6 @@ import java.util.List;
 public interface RegistrationRepository extends JpaRepository<Registration, Integer> {
 
     List<Registration> findByEventId(int eventId);
+    List<Registration> findByGymBroId(int id);
+
 }

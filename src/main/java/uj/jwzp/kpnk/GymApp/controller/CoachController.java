@@ -59,6 +59,4 @@ public class CoachController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-
 }

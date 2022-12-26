@@ -9,45 +9,25 @@ import java.util.Objects;
 @Entity
 @Table(name = "registration")
 @SequenceGenerator(name = "default_gen", sequenceName = "registration_seq", allocationSize = 1)
-public class Registration extends DomainObject implements ServiceEntity {
+public class Registration extends DomainObject {
 
-    @Column(nullable = false)
-    private String name;
-    @Column(nullable = false)
-    private String surname;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "gym_bro_id")
+    private int gymBroId;
+    @Column(nullable = false, name="event_id")
     private int eventId;
 
-    public Registration(int id, String name, String surname, int eventId) {
+    public Registration(int id, int eventId, int gymBroId) {
         super(id);
-        this.name = name;
-        this.surname = surname;
+        this.gymBroId = gymBroId;
         this.eventId = eventId;
     }
 
-    public Registration(String name, String surname, int eventId) {
-        this.name = name;
-        this.surname = surname;
+    public Registration(int eventId, int gymBroId) {
+        this.gymBroId = gymBroId;
         this.eventId = eventId;
     }
 
     public Registration() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
     }
 
     public int getEventId() {
@@ -63,21 +43,28 @@ public class Registration extends DomainObject implements ServiceEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Registration that = (Registration) o;
-        return this.getId() == that.getId() && eventId == that.eventId && name.equals(that.name) && surname.equals(that.surname);
+        return this.getId() == that.getId() && eventId == that.eventId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getId(), name, surname, eventId);
+        return Objects.hash(this.getId(), gymBroId, eventId);
     }
 
     @Override
     public String toString() {
         return "Registration{" +
                 "id=" + this.getId() +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
+                ", gymBroId=" + gymBroId +
                 ", eventId=" + eventId +
                 '}';
+    }
+
+    public int getGymBroId() {
+        return gymBroId;
+    }
+
+    public void setGymBroId(int gymBroId) {
+        this.gymBroId = gymBroId;
     }
 }

@@ -2,6 +2,7 @@ package uj.jwzp.kpnk.GymApp.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -11,7 +12,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "event")
-public class Event extends EventTemplate implements ServiceEntity {
+@SequenceGenerator(name = "default_gen", sequenceName = "event_seq", allocationSize = 1)
+public class Event extends EventTemplate {
 
     @Column(columnDefinition = "DATE")
     LocalDate eventDate;

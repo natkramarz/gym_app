@@ -1,6 +1,5 @@
 package uj.jwzp.kpnk.GymApp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,13 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uj.jwzp.kpnk.GymApp.controller.request.CreateRequest;
 import uj.jwzp.kpnk.GymApp.exception.club.ClubNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.coach.CoachAlreadyBookedException;
-import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.*;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.*;
-import uj.jwzp.kpnk.GymApp.service.ServiceProxy.*;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -32,15 +29,15 @@ import java.util.stream.Collectors;
 public class EventService implements ServiceLayer<Event> {
 
     private final EventRepository repository;
-    private final ClubServiceProxyImp clubService;
-    private final CoachServiceProxyImp coachService;
+    private final ServiceProxy.ClubServiceProxyImp clubService;
+    private final ServiceProxy.CoachServiceProxyImp coachService;
     private final EventTemplateRepository eventTemplateRepository;
     private final RegistrationRepository registrationRepository;
 
     public EventService(ApplicationContext context) {
         this.repository = context.getBean(EventRepository.class);
-        this.clubService = context.getBean(ClubServiceProxyImp.class);
-        this.coachService = context.getBean(CoachServiceProxyImp.class);
+        this.clubService = context.getBean(ServiceProxy.ClubServiceProxyImp.class);
+        this.coachService = context.getBean(ServiceProxy.CoachServiceProxyImp.class);
         this.eventTemplateRepository = context.getBean(EventTemplateRepository.class);
         this.registrationRepository = context.getBean(RegistrationRepository.class);
     }
@@ -78,8 +75,7 @@ public class EventService implements ServiceLayer<Event> {
         Club club = clubOptional.get();
         if (event.getDay() != event.getEventDate().getDayOfWeek())
             throw new EventTemplateDayOfWeekMismatchException(event.getDay(), event.getEventDate().getDayOfWeek());
-        if (coachService.get(event.getCoachId()) == null)
-            throw new CoachNotFoundException(event.getCoachId());
+        coachService.getService().get(event.getCoachId());
         if (event.getPeopleLimit() < 0) throw new PeopleLimitFormatException(event.getPeopleLimit());
         if (event.getEventDate().isBefore(LocalDate.now())) throw new EventPastDateException(event.getEventDate());
         if (event.getDuration().compareTo(Duration.ofHours(24)) > 0) throw new EventDurationException();
@@ -134,8 +130,7 @@ public class EventService implements ServiceLayer<Event> {
     }
 
     public Set<Event> eventsByDateAndClubId(LocalDate date, int clubId) {
-        if (clubService.get(clubId) == null) throw new ClubNotFoundException(clubId);
-
+        clubService.getService().get(clubId);
         return repository.findByClubIdAndEventDate(clubId, date);
     }
 

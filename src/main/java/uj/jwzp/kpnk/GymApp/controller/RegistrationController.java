@@ -45,5 +45,10 @@ public class RegistrationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/participants")
+    public ResponseEntity<?> getEventParticipants(@RequestParam("id") int id) {
+        return ResponseEntity.ok(service.eventParticipants(id));
+    }
+
 
 }
