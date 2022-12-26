@@ -1,8 +1,17 @@
 create table club (
     id serial primary key,
-    name text not null,
-    address text not null
+    name text not null
 );
+
+create table address (
+    club_id int,
+    street varchar(50) not null,
+    localNumber int,
+    city varchar(50) not null,
+    zipCode varchar(6) not null
+);
+
+alter table address add foreign key(club_id) references club(id);
 
 create table coach (
     id serial primary key,

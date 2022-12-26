@@ -47,11 +47,11 @@ class RegistrationServiceTest {
     @Test
     void createRegistration_KeptLimit() {
         given(eventRepository.findById(2)).willReturn(Optional.of(event));
-        given(repository.findByEventId(2)).willReturn(List.of(new Registration("Kate", "Tested", 2)));
-        var registration = new Registration("Hannah", "Test", 2);
+        given(repository.findByEventId(2)).willReturn(List.of(new Registration(1, 2)));
+        var registration = new Registration(1, 2);
         given(repository.save(registration)).willReturn(registration);
 
-        var newRegistration = registrationService.add(new RegistrationCreateRequest("Hannah", "Test", 2));
+        var newRegistration = registrationService.add(new RegistrationCreateRequest(1, 2));
 
         Assertions.assertEquals(registration, newRegistration);
     }
@@ -60,12 +60,12 @@ class RegistrationServiceTest {
     void createRegistration_overPeopleLimit() {
         given(eventRepository.findById(2)).willReturn(Optional.of(event));
         given(repository.findByEventId(2)).willReturn(List.of(
-                new Registration("Kate", "Tested", 2),
-                new Registration("Suzie", "Test", 2),
-                new Registration("Adam", "Test", 2)
+                new Registration(1,2),
+                new Registration(2, 2),
+                new Registration(3, 2)
                 ));
 
-        assertThatThrownBy(() -> registrationService.add(new RegistrationCreateRequest("Hannah", "Test", 2)))
+        assertThatThrownBy(() -> registrationService.add(new RegistrationCreateRequest(1, 2)))
                 .isInstanceOf(EventFullyBookedException.class)
                 .hasFieldOrPropertyWithValue("message", "Registration limit reached for the event with id:" + 2);
     }

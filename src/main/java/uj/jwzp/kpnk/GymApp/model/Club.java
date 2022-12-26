@@ -13,8 +13,8 @@ public class Club extends DomainObject {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String address;
+    @Embedded
+    private Address address;
 
     @ElementCollection
     @MapKeyEnumerated(EnumType.STRING)
@@ -23,14 +23,14 @@ public class Club extends DomainObject {
     public Club() {
     }
 
-    public Club(int id, String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
+    public Club(int id, String name, Address address, Map<DayOfWeek, OpeningHours> whenOpen) {
         super(id);
         this.name = name;
         this.address = address;
         this.whenOpen = whenOpen;
     }
 
-    public Club(String name, String address, Map<DayOfWeek, OpeningHours> whenOpen) {
+    public Club(String name, Address address, Map<DayOfWeek, OpeningHours> whenOpen) {
         this.name = name;
         this.address = address;
         this.whenOpen = whenOpen;
@@ -57,11 +57,11 @@ public class Club extends DomainObject {
         this.name = name;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
