@@ -12,10 +12,7 @@ import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventPastDateException;
 import uj.jwzp.kpnk.GymApp.exception.event.EventTimeException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
-import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.model.Event;
-import uj.jwzp.kpnk.GymApp.model.OpeningHours;
+import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 import uj.jwzp.kpnk.GymApp.repository.EventRepository;
@@ -58,7 +55,8 @@ class EventServiceTest {
         whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.MAX));
         whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.MAX));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
-        club = new Club(0, "testClub1", "testAddress1", whenOpen);
+        var address = new Address("Testowa", 2,"Testowo", "21-370");
+        club = new Club(0, "testClub1", address, whenOpen);
         coach = new Coach(0, "testCoach1", "testCoach1", 2000);
     }
 

@@ -13,10 +13,7 @@ import uj.jwzp.kpnk.GymApp.exception.coach.CoachNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateDurationException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundException;
 import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateTimeException;
-import uj.jwzp.kpnk.GymApp.model.Club;
-import uj.jwzp.kpnk.GymApp.model.Coach;
-import uj.jwzp.kpnk.GymApp.model.EventTemplate;
-import uj.jwzp.kpnk.GymApp.model.OpeningHours;
+import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.ClubRepository;
 import uj.jwzp.kpnk.GymApp.repository.CoachRepository;
 import uj.jwzp.kpnk.GymApp.repository.EventTemplateRepository;
@@ -54,7 +51,8 @@ public class EventTemplateServiceTest {
         whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.MAX));
         whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.MAX));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
-        club = new Club(0, "testClub1", "testAddress1", whenOpen);
+        var address = new Address("Testowa", 2,"Testowo", "21-370");
+        club = new Club(0, "testClub1", address, whenOpen);
         coach = new Coach(0, "testCoach1", "testCoach1", 2000);
         eventTemplate = new EventTemplate(0, "testEvent", DayOfWeek.MONDAY, LocalTime.of(11,0), Duration.ofMinutes(30), 1, 1, 8);
     }

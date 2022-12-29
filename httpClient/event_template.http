@@ -1,0 +1,65 @@
+### All event templates
+GET {{host}}/api/v1/event_templates
+Accept: application/json
+
+> {%
+    client.test("Get all event templates", function() {
+        client.assert(response.status == 200)
+    });
+%}
+
+### Add an event templates
+POST {{host}}/api/v1/event_templates
+Content-Type: application/json
+
+{
+  "title": "event testowy",
+  "day": "TUESDAY",
+  "time": "13:00",
+  "duration": "02:00",
+  "clubId": 1,
+  "coachId": 1
+}
+
+> {%  client.test("Create an event template", function() {
+        client.assert(response.status == 201)
+    });
+    client.global.set("new_event_template_id", response.body.id);
+%}
+
+### Modify an event template
+< {%
+    request.variables.set("id", "1")
+%}
+PUT {{host}}/api/v1/event_templates/{{new_event_templates_id}}
+Content-Type: application/json
+
+{
+  "title": "evencik22",
+  "day": "TUESDAY",
+  "time": "13:00",
+  "duration": "PT2H00M",
+  "clubId": 3,
+  "coachId": 1,
+  "peopleLimit": 4
+
+}
+
+> {%
+    client.test("Modify an event template", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Delete existing event template
+< {%
+    request.variables.set("id", "8")
+%}
+DELETE {{host}}/api/v1/event_templates/{{new_event_template_id}}
+Content-Type: application/json
+
+> {%
+    client.test("Delete an event", function() {
+        client.assert(response.status == 204)
+    })
+%}

@@ -1,0 +1,38 @@
+### All registrations
+GET {{host}}/api/v1/registrations
+Accept: application/json
+
+> {%
+    client.test("Get all registrations", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Add a registration
+POST {{host}}/api/v1/registrations
+Content-Type: application/json
+
+{
+    "gymBroId": 5,
+    "eventId": 1
+}
+
+> {%
+    client.test("Add a registration", function() {
+        client.assert(response.status == 201)
+    })
+    client.global.set("new_registration_id", response.body.id);
+%}
+
+### Delete existing registration
+< {%
+    request.variables.set("id", "1")
+%}
+DELETE {{host}}/api/v1/registrations/{{new_registration_id}}
+Content-Type: application/json
+
+> {%
+    client.test("Delete a registration", function() {
+        client.assert(response.status == 204)
+    })
+%}

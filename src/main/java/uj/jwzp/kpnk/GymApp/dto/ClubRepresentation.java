@@ -2,6 +2,7 @@ package uj.jwzp.kpnk.GymApp.dto;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
+import uj.jwzp.kpnk.GymApp.model.Address;
 import uj.jwzp.kpnk.GymApp.model.Club;
 import uj.jwzp.kpnk.GymApp.model.OpeningHours;
 
@@ -14,7 +15,7 @@ public class ClubRepresentation extends RepresentationModel<ClubRepresentation> 
 
     private int id;
     private String name;
-    private String address;
+    private Address address;
     private Map<DayOfWeek, OpeningHours> whenOpen;
 
     @Override
@@ -46,11 +47,11 @@ public class ClubRepresentation extends RepresentationModel<ClubRepresentation> 
         this.name = name;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 

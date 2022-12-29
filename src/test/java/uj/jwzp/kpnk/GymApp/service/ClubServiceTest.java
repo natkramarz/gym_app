@@ -53,7 +53,8 @@ public class ClubServiceTest {
         whenOpen.put(DayOfWeek.WEDNESDAY, new OpeningHours(LocalTime.of(7, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.THURSDAY, new OpeningHours(LocalTime.of(0, 0), LocalTime.of(0, 0)));
         whenOpen.put(DayOfWeek.FRIDAY, new OpeningHours(LocalTime.of(1, 0), LocalTime.of(22, 0)));
-        club = new Club(0, "testClub1", "testAddress1", whenOpen);
+        var address = new Address("Testowa", 2,"Testowo", "21-370");
+        club = new Club(0, "testClub1", address, whenOpen);
         coach = new Coach(1,"Kate", "Test", 2000);
         event = new Event(
                 1,
@@ -84,7 +85,7 @@ public class ClubServiceTest {
     @Test
     public void addValidClub() {
         given(clubRepository.save(club)).willReturn(club);
-        var newClub = clubService.add(new ClubCreateRequest(club.getName(), club.getAddress(), club.getWhenOpen()));
+        var newClub = clubService.add(new ClubCreateRequest(club.getName(), club.getWhenOpen(), club.getAddress()));
         Assertions.assertEquals(newClub, club);
     }
 
@@ -92,11 +93,12 @@ public class ClubServiceTest {
     public void modifyValidClub() {
         given(clubRepository.findById(0)).willReturn(Optional.of(club));
         given(eventService.eventsByClub(0)).willReturn(Set.of(event));
-        var uut = new Club(0, "modified1", "modified2", club.getWhenOpen());
+        var modifiedAddress = new Address("Modified", 2,"Testowo", "21-370");
+        var uut = new Club(0, "modified1", modifiedAddress, club.getWhenOpen());
         given(clubRepository.save(uut)).willReturn(uut);
         given(eventService.eventsByClub(0)).willReturn(Set.of());
         Mockito.doNothing().when(eventTemplateService).deleteEventTemplatesByClub(List.of());
-        var serviceClub = clubService.modify(0, new ClubCreateRequest("modified1", "modified2", club.getWhenOpen()));
+        var serviceClub = clubService.modify(0, new ClubCreateRequest("modified1", club.getWhenOpen(), modifiedAddress));
 
         Assertions.assertEquals(serviceClub, uut);
     }
@@ -105,7 +107,7 @@ public class ClubServiceTest {
     public void modifyNonExistentClub() {
         given(clubRepository.findById(2)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> clubService.modify(2, new ClubCreateRequest("test", "test", club.getWhenOpen())))
+        assertThatThrownBy(() -> clubService.modify(2, new ClubCreateRequest("test", club.getWhenOpen(), null)))
                 .isInstanceOf(ClubNotFoundException.class)
                 .hasFieldOrPropertyWithValue("message", "Unknown club id: 2");
     }
@@ -141,7 +143,7 @@ public class ClubServiceTest {
 
         given(eventService.isEventBetweenOpeningHours(newOpeningHours, event.getDay(), event.getStartTime(), event.getDuration())).willReturn(false);
 
-        assertThatThrownBy(() -> clubService.modify(1, new ClubCreateRequest(club.getName(), club.getAddress(), newOpeningHours)))
+        assertThatThrownBy(() -> clubService.modify(1, new ClubCreateRequest(club.getName(), newOpeningHours, club.getAddress())))
                 .isInstanceOf(ClubOpeningHoursException.class)
                 .hasMessageContaining("standing out events");
     }

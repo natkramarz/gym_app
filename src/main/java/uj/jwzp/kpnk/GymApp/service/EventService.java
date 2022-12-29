@@ -14,6 +14,7 @@ import uj.jwzp.kpnk.GymApp.exception.event_template.EventTemplateNotFoundExcepti
 import uj.jwzp.kpnk.GymApp.exception.event_template.PeopleLimitFormatException;
 import uj.jwzp.kpnk.GymApp.model.*;
 import uj.jwzp.kpnk.GymApp.repository.*;
+import uj.jwzp.kpnk.GymApp.service.ServiceProxy.*;
 
 import java.time.DayOfWeek;
 import java.time.Duration;

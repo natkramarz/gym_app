@@ -1,0 +1,94 @@
+### All clubs
+GET {{host}}/api/v1/clubs
+Accept: application/json
+
+> {%
+    client.test("Get all clubs", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+
+### All clubs with paging
+< {%
+    request.variables.set("page", "0")
+    request.variables.set("size", "3")
+%}
+GET {{host}}/api/v1/clubs?page={{page}}&size={{size}}
+
+> {%
+    client.test("Get all clubs with paging", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Add a club
+POST {{host}}/api/v1/clubs
+Content-Type: application/json
+
+{
+  "name": "Klub testowy 2",
+  "whenOpen": {
+    "TUESDAY": {
+      "from": "07:00",
+      "to": "22:00"
+    }
+  },
+  "address" : {
+    "street": "Testowa",
+    "city": "Kraków",
+    "localNumber": 2,
+    "zipCode": "21-370"
+
+  }
+}
+
+> {%
+    client.test("Add a club", function() {
+        client.assert(response.status == 201)
+    })
+    client.global.set("new_club_id", response.body.id);
+%}
+
+### Modify a club
+< {%
+    request.variables.set("id", "1")
+%}
+PUT {{host}}/api/v1/clubs/{{new_club_id}}
+Content-Type: application/json
+
+{
+  "name": "Zmodyfikowany klub",
+  "whenOpen": {
+    "TUESDAY": {
+      "from": "12:00",
+      "to": "14:00"
+    }
+  },
+  "address" : {
+    "street": "Testowa",
+    "city": "Kraków",
+    "localNumber": 2,
+    "zipCode": "21-370"
+
+  }
+}
+
+> {%
+    client.test("Modify a club", function() {
+        client.assert(response.status == 200)
+    })
+%}
+
+### Delete existing club
+< {%
+    request.variables.set("id", "1")
+%}
+DELETE {{host}}/api/v1/clubs/{{new_club_id}}
+Content-Type: application/json
+
+> {%
+    client.test("Delete a club", function() {
+        client.assert(response.status == 204)
+    })
+%}
